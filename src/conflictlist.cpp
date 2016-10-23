@@ -1,4 +1,5 @@
 #include "conflictlist.h"
+#include <iostream>
 using namespace voronoi;
 
 void ConflictList::add(GraphEdge* e)
@@ -21,7 +22,7 @@ void ConflictList::add(GraphEdge* e)
     }
 }
 
-void ConflictList::fill(std::list<Face &> visible)
+void ConflictList::fill(std::vector<Face*>* visible)
 {
     if(face_)
     {
@@ -30,9 +31,9 @@ void ConflictList::fill(std::list<Face &> visible)
     }
     GraphEdge* curr=head_;
     do{
-        visible.add(curr->face());
-        curr->face().setMarked(true);
-        curr=curr->nextf();
+        visible->push_back(curr->face_);
+        curr->face_->setMarked(true);
+        curr=curr->nextf_;
     }while(curr!=NULL);
 }
 
@@ -41,53 +42,58 @@ void ConflictList::removeAll()
     if(face_)//remove all vertices from face
     {
         GraphEdge* curr=head_;
-        do{
-            if(curr->prevf()==NULL)
+        while(curr!=NULL)
+        {
+            if(curr->prevf_==NULL)
             {
-                if(curr->nextf()==NULL) curr->vertex().getList().head_=NULL;
+                if(curr->nextf_==NULL) curr->vertex_->getList()->head_=NULL;
                 else
                 {
-                    curr->nextf().prevf()=NULL;
-                    curr->vertex().getList().head=curr.nextf();
+                    curr->nextf_->prevf_=NULL;
+                    curr->vertex_->getList()->head_=curr->nextf_;
                 }
             }else
             {
-                if(curr->nextf()!=NULL) curr->nextf().prevf()=curr->prevf();
-                curr->prevf().nextf()=curr->nextf();
+                if(curr->nextf_!=NULL) curr->nextf_->prevf_=curr->prevf_;
+                curr->prevf_->nextf_=curr->nextf_;
             }
-            curr=curr->nextv();
-            if(curr!=NULL)  curr->prevv()=NULL;
-        }while(curr!=NULL);
+            GraphEdge* tmp=curr; 
+            curr=curr->nextv_;
+            delete tmp;//Clean generate heap memory
+            if(curr!=NULL)  curr->prevv_=NULL;
+        }
     }else//remove all faces from vertex
     {
         GraphEdge* curr=head_;
-        do{
-            if(curr->prevv()==NULL)//Node is head
+        while(curr!=NULL)
+        {
+            if(curr->prevv_==NULL)//Node is head
             {
-                if(curr->nextv()==NULL) curr->face().getList().head_=NULL;
+                if(curr->nextv_==NULL) curr->face_->getList()->head_=NULL;
                 else
                 {
-                    curr->nextv().prevv()=NULL;
-                    curr->face().getList().head=curr.nextv();
+                    curr->nextv_->prevv_=NULL;
+                    curr->face_->getList()->head_=curr->nextv_;
                 }
             }else
             {
-                if(curr->nextv()!=NULL) curr->nextv().prevv()=curr->prevv();
-                curr->prevv().nextv()=curr->nextv();
+                if(curr->nextv_!=NULL) curr->nextv_->prevv_=curr->prevv_;
+                curr->prevv_->nextv_=curr->nextv_;
             }
-            curr=curr->nextf();
-            if(curr!=NULL)  curr->prevf()=NULL;
-        }while(curr!=NULL);
+            GraphEdge* tmp=curr;
+            curr=curr->nextf_;
+            delete tmp;
+            if(curr!=NULL)  curr->prevf_=NULL;
+        }
     }
 }
 
-std::list<Vertex&> ConflictList::getVertices(std::list<Vertex&> l1)
+void ConflictList::getVertices(std::vector<Vertex*>* l1)
 {
     GraphEdge* curr=head_;
     while(curr!=NULL)
     {
-        l1.add(curr->vertex());
-        curr=curr->nextv();
+        l1->push_back(curr->vertex_);
+        curr=curr->nextv_;
     }
-    return l1
 }

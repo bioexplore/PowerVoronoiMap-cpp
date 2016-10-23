@@ -1,6 +1,6 @@
 #ifndef CONVEXHULL_H
 #define CONVEXHULL_H
-#include <list>
+#include <vector>
 
 /**
  * Class for computing the covex hull of given vertices with a randomized
@@ -10,30 +10,33 @@
  * @author Jianye Xia at Chalmers University of Technology
  */
 namespace voronoi {
+    class Vertex;
+    class Face;
+    class HullEdge;
 class ConvexHull
 {
 public:
     ConvexHull();
     ~ConvexHull();
 
-    void                    addPoint(Vertex& v);
+    void                    addPoint(Vertex* v);
     void                    addPoint(double x,double y,double z);
-    std::list<Face*>*       compute();
+    std::vector<Face*>*       compute();
 
-    inline int              getVertexCount()        { return points_.size(); }
-    inline Vertex&          getVertex(int i)        { return points_[i];}
-    inline int              getFacetCount()         { return facets_.size(); }
-    inline Face&            getFacet(int i)         { return facets_[i]; }
+    inline int              getVertexCount()        { return points_->size(); }
+    inline Vertex*          getVertex(int i)        { return points_->operator[](i);}
+    inline int              getFacetCount()         { return facets_->size(); }
+    inline Face*            getFacet(int i)         { return facets_->operator[](i); }
 
 protected:
     const static int rand_seed_=0;
 private:
-    std::list<Vertex*>*         points_;
-    std::list<Face*>*           facets_;
-    std::list<Face*>*           created_;
-    std::list<HullEdge*>*       horizon_;
-    std::list<Face*>*           visible_;
-    int                         current_;
+    std::vector<Vertex*>*         points_;
+    std::vector<Face*>*           facets_;
+    std::vector<Face*>*           created_;
+    std::vector<HullEdge*>*       horizon_;
+    std::vector<Face*>*           visible_;
+    int                         currentIndex_;
     bool                        permutate_;
 
     /**
@@ -42,8 +45,9 @@ private:
      * @param old2 other incident facet of the horizon edge
      * @param fn newly created facet, which conflicts are added
      */
-    void            addConflicts(Face& old1, Face& old2, Face fnew);
-
+    void            addConflicts(Face* old1, Face* old2, Face* fnew);
+    
+    void            removeConflict(Face* f);
     /**
      * Prepares the convex hull computation
      * Builds the tetrahedron, fills the conflict graph and builds permutation for the points list
@@ -56,8 +60,8 @@ private:
      */
     void            permutation();
 
-    void            addFacet(Face& f0);
-    void            addConflicts(Face& f0, Vertex& v);
+    void            addFacet(Face* f0);
+    void            addConflict(Face* f0, Vertex* v);
     inline bool     isPermutate()       { return permutate_; }
     inline void     setPermutate(bool permutate)    { permutate_=permutate; }
 };

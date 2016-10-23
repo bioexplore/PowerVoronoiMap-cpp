@@ -1,5 +1,10 @@
 #ifndef VORONOI_POINT2D_H
 #define VORONOI_POINT2D_H
+#include <cmath>
+#include <cstdio>
+#ifdef JYXIA
+#include <iostream>
+#endif
 /**
  * Two-dimentional point, which also has functions as 2D vectors
  * @author Jianye Xia at Chalmers University of Technology
@@ -45,7 +50,7 @@ public:
      * @param p
      * @return dot-product
      */
-    inline double   dot(Point2D& p)             {return x*p.x+y*p.y;}
+    inline double   dot(Point2D* p)             {return x*(p->x)+y*(p->y);}
     inline double   length()                    {return std::sqrt(x*x+y*y);}
     inline double   lengthSquared()             { return x*x + y*y;}
     /**
@@ -58,8 +63,10 @@ public:
         x = p.x*d;
         y = p.y*d;
     }
-    inline void     normalize() //TODO: add deserte length !=0
+    inline void     normalize() 
     {
+        if(length()==0)
+            return;
         x/=length();
         y/=length();
     }
@@ -68,17 +75,23 @@ public:
      * @param p
      * @return angle
      */
-    inline double   angle(Point2D& p)
+    inline double   angle(Point2D* p)
     {
-        double d=dot(p)/(length()*p.length());
+        double d=dot(p)/(length()*(p->length()));
         if(d<-1.0)
            d=-1.0;
         if(d>1.0)
             d=1.0;
-        return std::scos(d);
+        return std::acos(d);
     }
-    void            setLocation(double a,double y)  {x=a;y=b;}
+    inline void            setLocation(double a,double b)  {x=a;y=b;}
 
+#ifdef JYXIA
+    inline void print()
+    {
+        std::cout<<"["<<x<<","<<y<<"]"<<std::endl;
+    }
+#endif
 };
 }
 #endif // POINT2D_H

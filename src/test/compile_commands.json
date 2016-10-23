@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/testConvexHull.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test/testConvexHull.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test/testConvexHull.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/conflictlist.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/conflictlist.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/conflictlist.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/convexhull.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/convexhull.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/convexhull.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/face.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/face.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/face.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/hulledge.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/hulledge.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/hulledge.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vector.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vector.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vector.cpp"
+},
+{
+  "directory": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test",
+  "command": "/usr/local/bin/g++     -ggdb3   -o CMakeFiles/testConvexHull.dir/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vertex.cpp.o -c /home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vertex.cpp",
+  "file": "/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/vertex.cpp"
+}
+]

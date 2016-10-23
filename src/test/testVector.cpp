@@ -1,4 +1,4 @@
-#include "../Vector.h"
+#include "../vector.h"
 #include <iostream>
 #include <cstdio>
 
@@ -9,9 +9,9 @@ int main()
     Vector v1(1,0,0);
     Vector v2(0,1,0);
     Vector v3(0,0,1);
-    double V1dV2=v1.dot(v2);
-    Vector V1cV2=v1.cross(v2);
-    Vector V1sV2=v1.subtract(v2);
+    double V1dV2=v1.dot(&v2);
+    Vector V1cV2=v1.cross(&v2);
+    Vector V1sV2=v1.subtract(&v2);
     
     std::cout<<"[v0]:"<<v0.toString()<<std::endl
              <<"[v1]:"<<v1.toString()<<std::endl

@@ -10,17 +10,20 @@
 namespace voronoi {
 class GraphEdge
 {
+    friend class ConflictList;
 public:
-    GraphEdge(Face& face,Vertex& vertex):
+    GraphEdge(Face* face,Vertex* vertex):
         face_(face),vertex_(vertex),nextf_(NULL),nextv_(NULL),prevf_(NULL),prevv_(NULL)
     {}
 protected:
-    Face& face_;
-    Vertex& vertex_;
+    Face* face_;
+    Vertex* vertex_;
     GraphEdge* nextf_;
     GraphEdge* prevf_;
     GraphEdge* nextv_;
     GraphEdge* prevv_;
+private:
+    GraphEdge();
 };
 }
 #endif // GRAPHEDGE_H
