@@ -1,0 +1,4 @@
+#ifndef VOROCELLOBJECT_H
+#define VOROCELLOBJECT_H
+
+#endif // VOROCELLOBJECT_H
