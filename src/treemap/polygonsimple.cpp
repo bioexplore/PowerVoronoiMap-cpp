@@ -3,16 +3,18 @@ using namespace voronoi;
 
 PolygonSimple::PolygonSimple()
 {
-        x = new double[16];
-        y = new double[16];
+    x = new double[16];
+    y = new double[16];
 }
 
 PolygonSimple::PolygonSimple(int numberPoints)
 {
-    if (numberPoints > 2) {
+    if (numberPoints > 2)
+    {
         x = new double[numberPoints];
         y = new double[numberPoints];
-    } else {
+    } else
+    {
         x = new double[16];
         y = new double[16];
     }
@@ -73,11 +75,11 @@ bool PolygonSimple::contains(Rectangle2D r)
     return contains(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 }
 
-
 bool PolygonSimple::contains(Point2D p)
 {
     return contains(p.getX(), p.getY());
 }
+
 bool PolygonSimple::contains(java.awt.geom.Point2D p)
 {
     return contains(p.getX(), p.getY());
@@ -143,43 +145,43 @@ class PolygonPathIterator implements PathIterator
     }
 
     /**
-         * Tests if there are more points to read.
-         *
-         * @return <code>true</code> if there are more points to read;
-         *         <code>false</code> otherwise.
-         */
+     * Tests if there are more points to read.
+     *
+     * @return <code>true</code> if there are more points to read;
+     *         <code>false</code> otherwise.
+     */
     bool isDone() {
         return index > poly.getNumPoints();
     }
 
     /**
-         * Moves the iterator forwards, along the primary direction of
-         * traversal, to the next segment of the path when there are more points
-         * in that direction.
-         */
+     * Moves the iterator forwards, along the primary direction of
+     * traversal, to the next segment of the path when there are more points
+     * in that direction.
+     */
     void next()
     {
         index++;
     }
 
     /**
-         * Returns the coordinates and type of the current path segment in the
-         * iteration. The return value is the path segment type: SEG_MOVETO,
-         * SEG_LINETO, or SEG_CLOSE. A <code>float</code> array of length 2 must
-         * be passed in and can be used to store the coordinates of the
-         * point(s). Each point is stored as a pair of <code>float</code>
-         * x,&nbsp;y coordinates. SEG_MOVETO and SEG_LINETO types return one
-         * point, and SEG_CLOSE does not return any points.
-         *
-         * @param coords
-         *            a <code>float</code> array that specifies the coordinates
-         *            of the point(s)
-         * @return an integer representing the type and coordinates of the
-         *         current path segment.
-         * @see PathIterator#SEG_MOVETO
-         * @see PathIterator#SEG_LINETO
-         * @see PathIterator#SEG_CLOSE
-         */
+     * Returns the coordinates and type of the current path segment in the
+     * iteration. The return value is the path segment type: SEG_MOVETO,
+     * SEG_LINETO, or SEG_CLOSE. A <code>float</code> array of length 2 must
+     * be passed in and can be used to store the coordinates of the
+     * point(s). Each point is stored as a pair of <code>float</code>
+     * x,&nbsp;y coordinates. SEG_MOVETO and SEG_LINETO types return one
+     * point, and SEG_CLOSE does not return any points.
+     *
+     * @param coords
+     *            a <code>float</code> array that specifies the coordinates
+     *            of the point(s)
+     * @return an integer representing the type and coordinates of the
+     *         current path segment.
+     * @see PathIterator#SEG_MOVETO
+     * @see PathIterator#SEG_LINETO
+     * @see PathIterator#SEG_CLOSE
+     */
     int currentSegment(float[] coords)
     {
         if (index >= poly.getNumPoints())
@@ -195,23 +197,23 @@ class PolygonPathIterator implements PathIterator
     }
 
     /**
-         * Returns the coordinates and type of the current path segment in the
-         * iteration. The return value is the path segment type: SEG_MOVETO,
-         * SEG_LINETO, or SEG_CLOSE. A <code>double</code> array of length 2
-         * must be passed in and can be used to store the coordinates of the
-         * point(s). Each point is stored as a pair of <code>double</code>
-         * x,&nbsp;y coordinates. SEG_MOVETO and SEG_LINETO types return one
-         * point, and SEG_CLOSE does not return any points.
-         *
-         * @param coords
-         *            a <code>double</code> array that specifies the coordinates
-         *            of the point(s)
-         * @return an integer representing the type and coordinates of the
-         *         current path segment.
-         * @see PathIterator#SEG_MOVETO
-         * @see PathIterator#SEG_LINETO
-         * @see PathIterator#SEG_CLOSE
-         */
+     * Returns the coordinates and type of the current path segment in the
+     * iteration. The return value is the path segment type: SEG_MOVETO,
+     * SEG_LINETO, or SEG_CLOSE. A <code>double</code> array of length 2
+     * must be passed in and can be used to store the coordinates of the
+     * point(s). Each point is stored as a pair of <code>double</code>
+     * x,&nbsp;y coordinates. SEG_MOVETO and SEG_LINETO types return one
+     * point, and SEG_CLOSE does not return any points.
+     *
+     * @param coords
+     *            a <code>double</code> array that specifies the coordinates
+     *            of the point(s)
+     * @return an integer representing the type and coordinates of the
+     *         current path segment.
+     * @see PathIterator#SEG_MOVETO
+     * @see PathIterator#SEG_LINETO
+     * @see PathIterator#SEG_CLOSE
+     */
     int currentSegment(double[] coords)
     {
         if (index >= poly.length)
@@ -806,7 +808,7 @@ int[] PolygonSimple::getYpointsClosed()
     return getPointsClosed(y);
 }
 
- int[] PolygonSimple::getPointsClosed(double[] values)
+int[] PolygonSimple::getPointsClosed(double[] values)
 {
     int[] x=new int[length+1];
     for (int i = 0; i < length; i++)

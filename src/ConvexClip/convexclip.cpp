@@ -1,6 +1,15 @@
 #incldue "convexclip.h"
-using namespace voronoi;
-void ConvexClip::Start(VertexList list1, VertexList list2)
+//using namespace voronoi;
+static int voronoi::ConvexClip::AreaSign(Point2D a, Point2D b, Point2D c)
+{
+    double area;
+    area = (b.x-a.x)* (c.y-a.y) - (c.x - a.x) * (b.y - a.y);
+    if( area > 0.000005) return 1;
+    else if( area < -0.000005) return -1;
+    else return 0;
+}
+
+void voronoi::ConvexClip::Start(VertexList& list1, VertexList& list2)
 {
     VertexList p = list1.copyList();
     VertexList q = list2.copyList();
@@ -22,7 +31,68 @@ void ConvexClip::Start(VertexList list1, VertexList list2)
     ConvexIntersection(p,q,p.n,q.n);
 }
 
-void ConvexClip::ConvexIntersection(VertexList p, VertexList q, int n, int m)
+InfoPoint voronoi::ConvexClip::intersect(Point2D& a, Point2D& b, Point2D& c, Point2D& d)
+{
+    double t,s,denum;
+    denum = ((d.x-c.x)*(b.y-a.y) - (b.x-a.x)* (d.y-c.y));
+    if(denum == 0) {
+        if(AreaSign(a,b,c) == 0){ //Collinear
+            if(between(a,b,c) && between (a,b,d)){
+                return new InfoPoint(c,d,'e');
+            }
+            if(between(c,d,a) && between (c,d,b)){
+                return new InfoPoint(a,b,'e');
+            }
+            if(between(a,b,c) && between (c,d,b)){
+                return new InfoPoint(c,b,'e');
+            }
+            if(between(a,b,c) && between (c,d,a)){
+                return new InfoPoint(c,a,'e');
+            }
+            if(between(a,b,d) && between (c,d,b)){
+                return new InfoPoint(d,b,'e');
+            }
+            if(between(a,b,d) && between (c,d,a)){
+                return new InfoPoint(d,a,'e');
+            }
+        }
+        return new InfoPoint(null,'n'); //no intersection
+    }
+    t = (a.x*(d.y -c.y) - a.y*(d.x-c.x) + c.y * (d.x-c.x) - c.x * (d.y-c.y))/denum;
+    s = ((b.x-a.x) * a.y + c.x * (b.y - a.y) - a.x * (b.y -a.y) - c.y * (b.x - a.x))/-denum;
+    if(t >= 0 && t <= 1 && s >= 0 && s <= 1){
+        return new InfoPoint(new Point2D(a.x + t*(b.x-a.x),a.y + t*(b.y-a.y)),'1'); //Proper intersection
+    }
+    return new InfoPoint(null,'n');
+}
+
+//=============PRIVATE MEMBER FUNCS============\\
+
+static bool voronoi::ConvexClip::between(Point2D& a, Point2D& b, Point2D& c)
+{
+    if(a.x != b.x)
+        return (c.x >= a.x && c.x <= b.x) || (c.x <= a.x && c.x >= b.x);
+    else
+        return (c.y >= a.y && c.y <= b.y) || (c.y <= a.y && c.y >= b.y);
+}
+
+static bool voronoi::ConvexClip::isConvex(VertexList& p2)
+{
+    if(p2.n < 3){
+        return false;
+    }
+    cVertex curr = p2.head;
+    curr = curr.next;
+    while(curr != p2.head){
+        if(AreaSign(curr.v, curr.next.v, curr.next.next.v) < 0){
+            return false;
+        }
+        curr = curr.next;
+    }
+    return true;
+}
+
+void voronoi::ConvexClip::ConvexIntersection(VertexList& p, VertexList& q, int n, int m)
 {
     cVertex currp = p.head, currq = q.head; //current vertex of both polygons
     InsideFlag flg = InsideFlag.UNKNOWN; //Information flag whether p or q is on the inside (or if it is unknown)
@@ -110,75 +180,9 @@ void ConvexClip::ConvexIntersection(VertexList p, VertexList q, int n, int m)
     }while(((ap < n) || (aq < m)) && (ap < 2*n) && (aq < 2*m));
 }
 
-double ConvexClip::dot(Point2D vP, Point2D vQ)
+double voronoi::ConvexClip::dot(Point2D& vP, Point2D& vQ)
 {
     return vP.x*vQ.x + vP.y*vQ.y;
 }
 
-static bool ConvexClip::isConvex(VertexList p2)
-{
-    if(p2.n < 3){
-        return false;
-    }
-    cVertex curr = p2.head;
-    curr = curr.next;
-    while(curr != p2.head){
-        if(AreaSign(curr.v, curr.next.v, curr.next.next.v) < 0){
-            return false;
-        }
-        curr = curr.next;
-    }
-    return true;
-}
 
-static int ConvexClip::AreaSign(Point2D a, Point2D b, Point2D c)
-{
-    double area;
-    area = (b.x-a.x)* (c.y-a.y) - (c.x - a.x) * (b.y - a.y);
-    if( area > 0.000005) return 1;
-    else if( area < -0.000005) return -1;
-    else return 0;
-}
-
-static bool ConvexClip::between(Point2D a, Point2D b, Point2D c)
-{
-    if(a.x != b.x)
-        return (c.x >= a.x && c.x <= b.x) || (c.x <= a.x && c.x >= b.x);
-    else
-        return (c.y >= a.y && c.y <= b.y) || (c.y <= a.y && c.y >= b.y);
-}
-
-InfoPoint ConvexClip::intersect(Point2D a, Point2D b, Point2D c, Point2D d)
-{
-    double t,s,denum;
-    denum = ((d.x-c.x)*(b.y-a.y) - (b.x-a.x)* (d.y-c.y));
-    if(denum == 0) {
-        if(AreaSign(a,b,c) == 0){ //Collinear
-            if(between(a,b,c) && between (a,b,d)){
-                return new InfoPoint(c,d,'e');
-            }
-            if(between(c,d,a) && between (c,d,b)){
-                return new InfoPoint(a,b,'e');
-            }
-            if(between(a,b,c) && between (c,d,b)){
-                return new InfoPoint(c,b,'e');
-            }
-            if(between(a,b,c) && between (c,d,a)){
-                return new InfoPoint(c,a,'e');
-            }
-            if(between(a,b,d) && between (c,d,b)){
-                return new InfoPoint(d,b,'e');
-            }
-            if(between(a,b,d) && between (c,d,a)){
-                return new InfoPoint(d,a,'e');
-            }
-        }
-        return new InfoPoint(null,'n'); //no intersection
-    }
-    t = (a.x*(d.y -c.y) - a.y*(d.x-c.x) + c.y * (d.x-c.x) - c.x * (d.y-c.y))/denum;
-    s = ((b.x-a.x) * a.y + c.x * (b.y - a.y) - a.x * (b.y -a.y) - c.y * (b.x - a.x))/-denum;
-    if(t >= 0 && t <= 1 && s >= 0 && s <= 1){
-        return new InfoPoint(new Point2D(a.x + t*(b.x-a.x),a.y + t*(b.y-a.y)),'1'); //Proper intersection
-    }
-    return new InfoPoint(null,'n');
-}

@@ -1,18 +1,22 @@
 #ifndef POLYGONSIMPLE_H
 #define POLYGONSIMPLE_H
+/**
+ * Implements a simple polygon with one continous region, by using two double arrays.
+ * @author Arlind Nocaj
+ *
+ */
 namespace voronoi {
 class PolygonSimple
 {
 public:
     PolygonSimple();
-    int length = 0;
+    int length;
 
     /**
      *
      * @param numberPoints initial array size, default initial array size is 16.
      */
     PolygonSimple(int numberPoints);
-
 
     /**
      *
@@ -61,7 +65,6 @@ public:
     bool contains(double x, double y, double w, double h);
     //@Override
     Rectangle2D getBounds2D();
-
 
     /**
      * Returns the path iterator for the shape(rather slow compared to using the point arrays directly).
@@ -293,8 +296,7 @@ public:
      * @param p4
      * @return
      */
-    private Point2D getIntersection(Point2D p1, Point2D p2,
-                                    Point2D p3, Point2D p4);
+    private Point2D getIntersection(Point2D p1, Point2D p2,Point2D p3, Point2D p4);
 
     /**
      * Return the intersection of the segment given bei p1 and p2 and the line
@@ -307,8 +309,7 @@ public:
      * @param p4
      * @return
      */
-    private static Point2D getIntersectionOfSegmentAndLine(Point2D p1, Point2D p2,
-                                                           Point2D p3, Point2D p4);
+    private static Point2D getIntersectionOfSegmentAndLine(Point2D p1, Point2D p2,Point2D p3, Point2D p4);
 
     /**
      * Array with x-values of the polygon points.
@@ -327,15 +328,10 @@ public:
      * @return
      */
     PolygonSimple getOriginalPolygon();
-
     //@Override
     Iterator<Point2D> iterator();
-
     int[] getXpointsClosed();
-
-    int[] getYpointsClosed();
-
-    private int[] getPointsClosed(double[] values);
+    int[] getYpointsClosed();    
 protected:
     /**
      * Used for generation of a random point in a polygon.
@@ -346,7 +342,7 @@ protected:
      * centroid of the polygon is stored for faster access, once it is computed
      */
     Point2D centroid;
-    double area = -1;
+    double area;
     Rectangle2D.Double bounds;
 
     /**
@@ -355,7 +351,10 @@ protected:
     PolygonSimple oldPolygon;
 
     double[] x; /** x-coordinates */
-    double[] y; /** y-coordinates *
+    double[] y; /** y-coordinates */
+private:
+    int[] getPointsClosed(double[] values);
+
 };
 }
 
