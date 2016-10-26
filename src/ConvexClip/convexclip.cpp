@@ -1,12 +1,13 @@
 #incldue "convexclip.h"
+#include "point2d.h"
 //using namespace voronoi;
-static int voronoi::ConvexClip::AreaSign(Point2D a, Point2D b, Point2D c)
+static int voronoi::ConvexClip::AreaSign(Point2D& a, Point2D& b, Point2D& c)
 {
     double area;
-    area = (b.x-a.x)* (c.y-a.y) - (c.x - a.x) * (b.y - a.y);
+    area = (b.x-a.x)* (c.y-a.y) - (c.x - a.x) * (b.y - a.y);//cross product of vec(a->c) and vec(a->b)
     if( area > 0.000005) return 1;
     else if( area < -0.000005) return -1;
-    else return 0;
+    else return 0; //means a, b, c are on the same line
 }
 
 void voronoi::ConvexClip::Start(VertexList& list1, VertexList& list2)
@@ -34,8 +35,9 @@ void voronoi::ConvexClip::Start(VertexList& list1, VertexList& list2)
 InfoPoint voronoi::ConvexClip::intersect(Point2D& a, Point2D& b, Point2D& c, Point2D& d)
 {
     double t,s,denum;
-    denum = ((d.x-c.x)*(b.y-a.y) - (b.x-a.x)* (d.y-c.y));
-    if(denum == 0) {
+    denum = ((d.x-c.x)*(b.y-a.y) - (b.x-a.x)* (d.y-c.y));//cross product of vec(a->b) and vec(c->d)
+    if(denum == 0)// means vec(a->b) is parallel to vec(c->d)
+    {
         if(AreaSign(a,b,c) == 0){ //Collinear
             if(between(a,b,c) && between (a,b,d)){
                 return new InfoPoint(c,d,'e');
@@ -56,7 +58,7 @@ InfoPoint voronoi::ConvexClip::intersect(Point2D& a, Point2D& b, Point2D& c, Poi
                 return new InfoPoint(d,a,'e');
             }
         }
-        return new InfoPoint(null,'n'); //no intersection
+        return new InfoPoint(null,'n'); //no intersection, parallel  //TODO: define a nullpoint Point2D object that has nothing in it!
     }
     t = (a.x*(d.y -c.y) - a.y*(d.x-c.x) + c.y * (d.x-c.x) - c.x * (d.y-c.y))/denum;
     s = ((b.x-a.x) * a.y + c.x * (b.y - a.y) - a.x * (b.y -a.y) - c.y * (b.x - a.x))/-denum;
@@ -81,38 +83,38 @@ static bool voronoi::ConvexClip::isConvex(VertexList& p2)
     if(p2.n < 3){
         return false;
     }
-    cVertex curr = p2.head;
-    curr = curr.next;
+    cVertex* curr = p2.head->next;
+
     while(curr != p2.head){
-        if(AreaSign(curr.v, curr.next.v, curr.next.next.v) < 0){
+        if(AreaSign(curr->v, curr->next->v, curr->next->next->v) < 0){
             return false;
         }
-        curr = curr.next;
+        curr = curr->next;
     }
     return true;
 }
 
 void voronoi::ConvexClip::ConvexIntersection(VertexList& p, VertexList& q, int n, int m)
 {
-    cVertex currp = p.head, currq = q.head; //current vertex of both polygons
+    cVertex *currp = p.head, *currq = q.head; //current vertex of both polygons
     InsideFlag flg = InsideFlag.UNKNOWN; //Information flag whether p or q is on the inside (or if it is unknown)
     int ap = 0, aq = 0;		// counter for the termination condition(ap = advance p,aq = advance q)
-    Point2D nil = new Point2D(); // (0,0) Vertex
+    Point2D nil; // (0,0) Vertex
     Point2D vQ,vP; //current directed edges of both polygons
     bool FirstPoint = true; //Flag whether first point or not
     do{
-        InfoPoint c = intersect(currp.prev.v, currp.v, currq.prev.v, currq.v); //Intersection of two polygon edges
-        vQ = new Point2D(currq.v.x - currq.prev.v.x,currq.v.y - currq.prev.v.y);
-        vP = new Point2D(currp.v.x - currp.prev.v.x,currp.v.y - currp.prev.v.y);
+        InfoPoint c = intersect(currp->prev->v, currp->v, currq->prev->v, currq->v); //Intersection of two polygon edges
+        vQ = Point2D(currq->v.x - currq->prev->v.x,currq->v.y - currq->prev->v.y);
+        vP = Point2D(currp->v.x - currp->prev->v.x,currp->v.y - currp->prev->v.y);
         int cross = AreaSign(nil,vP,vQ); //sign of crossproduct of vP and vQ
-        int pInQ  = AreaSign(currq.prev.v, currq.v, currp.v); // if currp is on the half plane of q
-        int qInP  = AreaSign(currp.prev.v, currp.v, currq.v); // if currq is on the half plane of p
+        int pInQ  = AreaSign(currq->prev->v, currq->v, currp->v); // if currp is on the half plane of q
+        int qInP  = AreaSign(currp->prev->v, currp->v, currq->v); // if currq is on the half plane of p
         if(c.code == '1'){ // Proper intersection
             if (flg == InsideFlag.UNKNOWN && FirstPoint) {
                 FirstPoint = false;
                 ap = aq = 0;
             }
-            inters.InsertBeforeHead(new cVertex(c.erg)); //Adding the intersection to the result
+            inters->InsertBeforeHead(new cVertex(c.erg)); //Adding the intersection to the result
             //Flag update
             if(pInQ > 0){
                 flg = InsideFlag.PIN;

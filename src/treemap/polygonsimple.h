@@ -10,7 +10,7 @@ class PolygonSimple
 {
 public:
     PolygonSimple();
-    int length;
+    int length();
 
     /**
      *
@@ -78,7 +78,7 @@ public:
     //@Override
     PathIterator getPathIterator(AffineTransform at, double flatness);
 
-    class PolygonPathIterator implements PathIterator
+    class PolygonPathIterator// implements PathIterator
     {
         PolygonSimple poly;
         AffineTransform transform;
@@ -336,25 +336,25 @@ protected:
     /**
      * Used for generation of a random point in a polygon.
      */
-    Random seed = new Random(5);
+    //Random seed = new Random(5);
 
     /**
      * centroid of the polygon is stored for faster access, once it is computed
      */
-    Point2D centroid;
-    double area;
-    Rectangle2D.Double bounds;
+    Point2D centroid_;
+    double area_;
+    Rectangle2D.Double bounds_;
 
     /**
      * Stores the orginal polygon result, without shrinking
      */
-    PolygonSimple oldPolygon;
+    PolygonSimple oldPolygon_;
 
-    double[] x; /** x-coordinates */
-    double[] y; /** y-coordinates */
+    double* x_; /** x-coordinates */
+    double* y_; /** y-coordinates */
+    int length_; // Number of points that consists the polygon
 private:
     int[] getPointsClosed(double[] values);
-
 };
 }
 

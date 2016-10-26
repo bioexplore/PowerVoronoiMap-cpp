@@ -1,10 +1,11 @@
 #include "polygonsimple.h"
 using namespace voronoi;
 
-PolygonSimple::PolygonSimple()
+PolygonSimple::PolygonSimple():
+    length_(16),
 {
-    x = new double[16];
-    y = new double[16];
+    x_ = new double[16];
+    y_ = new double[16];
 }
 
 PolygonSimple::PolygonSimple(int numberPoints)
