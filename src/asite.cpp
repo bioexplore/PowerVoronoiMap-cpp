@@ -223,7 +223,9 @@ ArrayList<Site> ASite::getOldNeighbors()
 {
     return oldNeighbors;
 }
+//TODO: should delete oldNeighbors originally occupied memory
 void ASite::setOldNeighbors(ArrayList<Site> oldNeighbors)
 {
+    if(oldNeighbors) delete oldNeighbors;
     this.oldNeighbors = oldNeighbors;
 }
