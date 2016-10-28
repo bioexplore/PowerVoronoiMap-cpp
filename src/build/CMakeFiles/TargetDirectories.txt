@@ -1,3 +1,0 @@
-/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/build/CMakeFiles/rebuild_cache.dir
-/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/build/CMakeFiles/edit_cache.dir
-/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/build/CMakeFiles/convexhull.dir

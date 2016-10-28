@@ -1,2 +1,0 @@
-/usr/bin/ar qc libconvexhull.a  CMakeFiles/convexhull.dir/conflictlist.cpp.o CMakeFiles/convexhull.dir/convexhull.cpp.o CMakeFiles/convexhull.dir/face.cpp.o CMakeFiles/convexhull.dir/hulledge.cpp.o CMakeFiles/convexhull.dir/vector.cpp.o CMakeFiles/convexhull.dir/vertex.cpp.o
-/usr/bin/ranlib libconvexhull.a
