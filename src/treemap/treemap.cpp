@@ -52,7 +52,7 @@ void voronoi::VoronoiTreemap::computeLocked()
         e.printStackTrace();
     }
 }
-void setReferenceMap(ArrayList<Tuple3ID> voronoi::VoronoiTreemap::relativePositions)
+void voronoi::VoronoiTreemap::setReferenceMap(ArrayList<Tuple3ID> relativePositions)
 {
     for (Tuple3ID tuple : relativePositions)
     {
@@ -416,7 +416,7 @@ void voronoi::VoronoiTreemap::addChildren(HashMap<Integer, VoroNode> idToNode,
         voroParent.addChild(voroChild);
         voroChild.setParent(voroParent);
     }
-
+    // add children to children
     for (int i = 1; i < childList.size(); i++)
     {
         Integer childId = childList.get(i);

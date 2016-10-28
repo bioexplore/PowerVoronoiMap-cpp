@@ -1,5 +1,8 @@
 #ifndef TREEDATA_H
 #define TREEDATA_H
+#include <unordered_map>
+#include <string>
+#include <vector>
 namespace voronoi {
 /**
  * Class for storing tree data (or hierarchy) with a root.
@@ -9,42 +12,45 @@ namespace voronoi {
 class TreeData
 {
 public:
-    //adjacency list of the tree structure
-    ArrayList<ArrayList<Integer>> tree;
-    // index of the root node
-    Integer rootIndex;
-    //map pointing to the node attributes of a specific id
-    HashMap<Integer, Node> nodeAtt;
+    TreeData();
+    ~TreeData();
 
-    static class Node
+    class Node
     {
     public:
-        Node(){}
+        Node():parentId(-1),nodeId(-1),level(-1),name(""),weight(1){}
 
         // id of the parent node
-        Integer parentId;
+        int parentId;
         // id of this node
-        Integer nodeId;
+        int nodeId;
         // level of this node
-        Integer level;
+        int level;
         //name of this node
-        String name;
+        std::string name;
         // weight of this node
-        double weight=1;
+        double weight;
 
         // relative coordinate of this node
-        Point2D.Double relativeCoord;
+        //Point2D relativeCoord;
     };
 
-    void setRoot(String name);
-    void setWeight(String name,double weight);
-    void addLink(String childName, String parentName);
+    void setRoot(std::string name);
+    void setWeight(std::string name,double weight);
+    void addLink(std::string childName, std::string parentName);
 
 private:
-    HashMap<String, Integer> nodeNameToId_;
+    std::unordered_map<std::string, int>* nodeNameToId_;
+    //adjacency list of the tree structure
+    std::vector<std::vector<int> >* tree_;
+    // index of the root node
+    int rootIndex_;
+    //map pointing to the node attributes of a specific id
+    std::unordered_map<int, Node*>* nodeAtt_;
+
 
     void init();
-    Node createNode(String name);
+    Node* createNode(std::string name);
 };
 }
 #endif // TREEDATA_H
