@@ -1,0 +1,3 @@
+/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test/CMakeFiles/rebuild_cache.dir
+/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test/CMakeFiles/edit_cache.dir
+/home/jyxia/Desktop/workspace/cpp/voronoi/powerVoronoi/src/test/CMakeFiles/testConvexHull.dir

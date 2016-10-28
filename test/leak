@@ -1,0 +1,181 @@
+==25068== Memcheck, a memory error detector
+==25068== Copyright (C) 2002-2012, and GNU GPL'd, by Julian Seward et al.
+==25068== Using Valgrind-3.8.1 and LibVEX; rerun with -h for copyright info
+==25068== Command: ./testConvexHull
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x407A7D: __gnu_cxx::new_allocator<voronoi::Face*>::construct(voronoi::Face**, voronoi::Face* const&) (new_allocator.h:105)
+==25068==    by 0x407997: std::vector<voronoi::Face*, std::allocator<voronoi::Face*> >::push_back(voronoi::Face* const&) (stl_vector.h:737)
+==25068==    by 0x40777A: voronoi::ConflictList::fill(std::vector<voronoi::Face*, std::allocator<voronoi::Face*> >*) (conflictlist.cpp:34)
+==25068==    by 0x409571: voronoi::ConvexHull::compute() (convexhull.cpp:69)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df880 is 0 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x4077EE: voronoi::ConflictList::removeAll() (conflictlist.cpp:65)
+==25068==    by 0x40BE36: voronoi::Face::removeConflict() (face.cpp:123)
+==25068==    by 0x409CBC: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:180)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40777F: voronoi::ConflictList::fill(std::vector<voronoi::Face*, std::allocator<voronoi::Face*> >*) (conflictlist.cpp:35)
+==25068==    by 0x409571: voronoi::ConvexHull::compute() (convexhull.cpp:69)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df880 is 0 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x4077EE: voronoi::ConflictList::removeAll() (conflictlist.cpp:65)
+==25068==    by 0x40BE36: voronoi::Face::removeConflict() (face.cpp:123)
+==25068==    by 0x409CBC: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:180)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid write of size 1
+==25068==    at 0x407929: voronoi::Face::setMarked(bool) (face.h:38)
+==25068==    by 0x40778E: voronoi::ConflictList::fill(std::vector<voronoi::Face*, std::allocator<voronoi::Face*> >*) (conflictlist.cpp:35)
+==25068==    by 0x409571: voronoi::ConvexHull::compute() (convexhull.cpp:69)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df248 is 8 bytes inside a block of size 80 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x409E09: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x407793: voronoi::ConflictList::fill(std::vector<voronoi::Face*, std::allocator<voronoi::Face*> >*) (conflictlist.cpp:36)
+==25068==    by 0x409571: voronoi::ConvexHull::compute() (convexhull.cpp:69)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df890 is 16 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x4077EE: voronoi::ConflictList::removeAll() (conflictlist.cpp:65)
+==25068==    by 0x40BE36: voronoi::Face::removeConflict() (face.cpp:123)
+==25068==    by 0x409CBC: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:180)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40A6E8: voronoi::HullEdge::getiFace() (hulledge.h:38)
+==25068==    by 0x40C59A: voronoi::HullEdge::isHorizon() (hulledge.cpp:20)
+==25068==    by 0x40BDDB: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df6b0 is 16 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x40B897: voronoi::Face::~Face() (face.cpp:41)
+==25068==    by 0x409E01: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 1
+==25068==    at 0x40C760: voronoi::Face::isMarked() (face.h:29)
+==25068==    by 0x40C5A2: voronoi::HullEdge::isHorizon() (hulledge.cpp:20)
+==25068==    by 0x40BDDB: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df248 is 8 bytes inside a block of size 80 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x409E09: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40BDAF: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df268 is 40 bytes inside a block of size 80 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x409E09: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40A6D6: voronoi::HullEdge::getTwin() (hulledge.h:37)
+==25068==    by 0x40BDBB: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df5d8 is 24 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x40B897: voronoi::Face::~Face() (face.cpp:41)
+==25068==    by 0x409E01: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40BDCF: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df268 is 40 bytes inside a block of size 80 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x409E09: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40C582: voronoi::HullEdge::isHorizon() (hulledge.cpp:20)
+==25068==    by 0x40BDDB: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df5d8 is 24 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x40B897: voronoi::Face::~Face() (face.cpp:41)
+==25068==    by 0x409E01: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== Invalid read of size 8
+==25068==    at 0x40C58F: voronoi::HullEdge::isHorizon() (hulledge.cpp:20)
+==25068==    by 0x40BDDB: voronoi::Face::getHorizon() (face.cpp:116)
+==25068==    by 0x40959E: voronoi::ConvexHull::compute() (convexhull.cpp:74)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068==  Address 0x51df5d8 is 24 bytes inside a block of size 48 free'd
+==25068==    at 0x4A06016: operator delete(void*) (vg_replace_malloc.c:480)
+==25068==    by 0x40B897: voronoi::Face::~Face() (face.cpp:41)
+==25068==    by 0x409E01: voronoi::ConvexHull::removeConflict(voronoi::Face*) (convexhull.cpp:199)
+==25068==    by 0x409856: voronoi::ConvexHull::compute() (convexhull.cpp:111)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== 
+==25068== HEAP SUMMARY:
+==25068==     in use at exit: 75,800 bytes in 78 blocks
+==25068==   total heap usage: 147 allocs, 69 frees, 77,280 bytes allocated
+==25068== 
+==25068== 48 bytes in 3 blocks are definitely lost in loss record 45 of 60
+==25068==    at 0x4A075FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+==25068==    by 0x40B674: voronoi::Face::Face(voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*) (face.cpp:25)
+==25068==    by 0x409684: voronoi::ConvexHull::compute() (convexhull.cpp:87)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== 144 (48 direct, 96 indirect) bytes in 1 blocks are definitely lost in loss record 55 of 60
+==25068==    at 0x4A075FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+==25068==    by 0x40B934: voronoi::Face::createEdges() (face.cpp:59)
+==25068==    by 0x40B770: voronoi::Face::Face(voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*) (face.cpp:31)
+==25068==    by 0x40A2AE: voronoi::ConvexHull::prep() (convexhull.cpp:254)
+==25068==    by 0x4094CC: voronoi::ConvexHull::compute() (convexhull.cpp:57)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== 144 (48 direct, 96 indirect) bytes in 1 blocks are definitely lost in loss record 56 of 60
+==25068==    at 0x4A075FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+==25068==    by 0x40B934: voronoi::Face::createEdges() (face.cpp:59)
+==25068==    by 0x40B770: voronoi::Face::Face(voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*) (face.cpp:31)
+==25068==    by 0x40A2FB: voronoi::ConvexHull::prep() (convexhull.cpp:255)
+==25068==    by 0x4094CC: voronoi::ConvexHull::compute() (convexhull.cpp:57)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== 144 (48 direct, 96 indirect) bytes in 1 blocks are definitely lost in loss record 57 of 60
+==25068==    at 0x4A075FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+==25068==    by 0x40B934: voronoi::Face::createEdges() (face.cpp:59)
+==25068==    by 0x40B770: voronoi::Face::Face(voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*, voronoi::Vertex*) (face.cpp:31)
+==25068==    by 0x40A348: voronoi::ConvexHull::prep() (convexhull.cpp:256)
+==25068==    by 0x4094CC: voronoi::ConvexHull::compute() (convexhull.cpp:57)
+==25068==    by 0x4074F9: main (testConvexHull.cpp:17)
+==25068== 
+==25068== LEAK SUMMARY:
+==25068==    definitely lost: 192 bytes in 6 blocks
+==25068==    indirectly lost: 288 bytes in 6 blocks
+==25068==      possibly lost: 0 bytes in 0 blocks
+==25068==    still reachable: 75,320 bytes in 66 blocks
+==25068==         suppressed: 0 bytes in 0 blocks
+==25068== Reachable blocks (those to which a pointer was found) are not shown.
+==25068== To see them, rerun with: --leak-check=full --show-reachable=yes
+==25068== 
+==25068== For counts of detected and suppressed errors, rerun with: -v
+==25068== ERROR SUMMARY: 364254 errors from 15 contexts (suppressed: 6 from 6)
