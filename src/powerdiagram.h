@@ -13,13 +13,11 @@ namespace voronoi {
  * @author Arlind Nocaj
  *
  */
-typedef std::vector<Site*>  OpenList;
-typedef std::vector	    ArrayList;
 class PowerDiagram
 {
-    const static double numericError_ = 1E-10;
+    constexpr static double numericError_ = 1E-10;
     int amountPolygons_;
-    Rectangle2D* bb_;
+    Rectangle2D bb_;
 
     // set of sites which forms a rectangle that is big enough to bound a
     // diagram with creating a bisector in the clipping polygon
@@ -40,7 +38,7 @@ class PowerDiagram
      * @param edge
      * @return
      */
-    ArrayList<Face*>* getFacesOfDestVertex(HullEdge& edge);
+    std::vector<Face*>* getFacesOfDestVertex(HullEdge* edge);
 protected:
     ConvexHull* hull_;
     std::vector<Site*>* sites_;
@@ -51,8 +49,9 @@ public:
     //static Random rand = new Random(99);
     const static int halfLineScalingFactor = 10000;
     PowerDiagram();
-    PowerDiagram(OpenList* sites, PolygonSimple* clipPoly);
-    void 		setSites(OpenList* sites);
+    PowerDiagram(std::vector<Site*>* sites, PolygonSimple* clipPoly);
+    ~PowerDiagram();
+    void 		setSites(std::vector<Site*>* sites);
     void 		setClipPoly(PolygonSimple* polygon);
     PolygonSimple* 	getClipPoly();
     void 		computeDiagram();

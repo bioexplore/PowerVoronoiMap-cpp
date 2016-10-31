@@ -38,7 +38,9 @@ public:
     void setRoot(std::string name);
     void setWeight(std::string name,double weight);
     void addLink(std::string childName, std::string parentName);
-
+    int  getRootIndex();
+    std::vector<std::vector<int> >* getTree();
+    std::unordered_map<int,Node*>* getNodeAttDict();
 private:
     std::unordered_map<std::string, int>* nodeNameToId_;
     //adjacency list of the tree structure

@@ -32,8 +32,8 @@ class HullEdge{
         void setNext(HullEdge* edge);
         void setPrev(HullEdge* edge);
 
-        Vertex*           getStartPtr() ;
-        Vertex*           getEndPtr() ;
+        Vertex*           getStart() ;
+        Vertex*           getEnd() ;
         HullEdge*               getTwin()               {return twin_;}
         Face*             getiFace()                    {return iFace_;}
         HullEdge*               getNext()               {return next_;} 

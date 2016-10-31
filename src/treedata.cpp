@@ -57,7 +57,18 @@ void voronoi::TreeData::addLink(std::string childName,std::string parentName)
     childNode->parentId=parentNode->nodeId;
     tree_->at(parentNode->nodeId).push_back(childNode->nodeId);
 }
-
+int voronoi::TreeData::getRootIndex()
+{
+    return rootIndex_;
+}
+std::vector<std::vector<int> >* voronoi::TreeData::getTree()
+{
+    return tree_;
+}
+std::unordered_map<int, voronoi::TreeData::Node*>* voronoi::TreeData::getNodeAttDict()
+{
+    return nodeAtt_;
+}
 //============PRIVATE MEMBER FUNCS===========\\
 
 void voronoi::TreeData::init()

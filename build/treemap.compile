@@ -1,0 +1,56 @@
+../src/treemap.cpp: In function ‘void startComputeThreads()’:
+../src/treemap.cpp:488:5: error: ‘runningThreads’ was not declared in this scope
+     runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
+     ^
+../src/treemap.cpp:488:22: error: ‘Collections’ was not declared in this scope
+     runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
+                      ^
+../src/treemap.cpp:488:52: error: ‘Concurrentstd’ does not name a type
+     runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
+                                                    ^
+../src/treemap.cpp:488:90: error: expected primary-expression before ‘bool’
+     runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
+                                                                                          ^
+../src/treemap.cpp:489:42: error: ‘getNumberThreads’ was not declared in this scope
+     for (int i = 0; i < getNumberThreads(); i++)
+                                          ^
+../src/treemap.cpp:490:13: error: expected type-specifier before ‘VoroCPU’
+         new VoroCPU(cellQueue, this, runningThreads).start();
+             ^
+../src/treemap.cpp: In function ‘void setRelativePositions(std::vector<voronoi::Tuple3ID*>*)’:
+../src/treemap.cpp:495:9: error: ‘relativePositions_’ was not declared in this scope
+     if (relativePositions_ == NULL)
+         ^
+../src/treemap.cpp:497:36: error: ‘idToNode_’ was not declared in this scope
+         for (auto& voroNodePair : *idToNode_)
+                                    ^
+../src/treemap.cpp:501:13: error: ‘VoroNode’ was not declared in this scope
+             VoroNode* voroNode=voroNodePair->second;
+             ^
+../src/treemap.cpp:501:13: note: suggested alternative:
+In file included from ../src/treemap.h:6:0,
+                 from ../src/treemap.cpp:4:
+../src/voronode.h:21:7: note:   ‘voronoi::VoroNode’
+ class VoroNode:public VoroCellObject //implements VoroCellObject
+       ^
+../src/treemap.cpp:501:23: error: ‘voroNode’ was not declared in this scope
+             VoroNode* voroNode=voroNodePair->second;
+                       ^
+../src/treemap.cpp:502:53: error: ‘Point2D’ was not declared in this scope
+             voroNode->setRelativeVector(Point2D(x, y));
+                                                     ^
+../src/treemap.cpp:502:53: note: suggested alternative:
+In file included from ../src/polygonsimple.h:5:0,
+                 from ../src/voronode.h:6,
+                 from ../src/treemap.h:6,
+                 from ../src/treemap.cpp:4:
+../src/point2d.h:13:7: note:   ‘voronoi::Point2D’
+ class Point2D
+       ^
+../src/treemap.cpp:506:38: error: ‘setReferenceMap’ was not declared in this scope
+     setReferenceMap(relativePositions);
+                                      ^
+../src/treemap.cpp: In function ‘void setShowLeafs(bool)’:
+../src/treemap.cpp:510:5: error: ‘showLeafs_’ was not declared in this scope
+     showLeafs_ = showLeafs;
+     ^

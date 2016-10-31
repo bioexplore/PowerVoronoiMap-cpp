@@ -1,6 +1,8 @@
 #ifndef ASITE_H
 #define ASITE_H
-
+#include "vertex.h"
+#include "polygonsimple.h"
+#include "vorocellobject.h"
 /**
  * A site is a 2 dimensional point which has a weight.
  *
@@ -8,10 +10,11 @@
  *
  */
 namespace voronoi {
-class ASite extends JVertex implements Comparable<Site>, iSite
+class Site;
+class AbstractSite:public Vertex
 {
 public:
-    PolygonSimple nonClippedPolyon;
+    PolygonSimple* nonClippedPolygon;
 
     /**
      * Preflow Extrapolation
@@ -23,34 +26,34 @@ public:
       * @param x x-coordinate
       * @param y y-coordinate
       */
-    ASite(double x, double y);
+    AbstractSite(double x, double y);
     /**
       *
       * @param x x-coordinate
       * @param y y-coordinate
       * @param weight the weight of the site, where weight=radius*radius which is used for weighting
       */
-    ASite(double x, double y, double weight);
-    ASite(double x, double y, double weight, double percentage);
+    AbstractSite(double x, double y, double weight);
+    AbstractSite(double x, double y, double weight, double percentage);
 
     /* (non-Javadoc)
      * @see j2d.iSite#getPolygon()
      */
-    PolygonSimple getPolygon();
+    PolygonSimple* getPolygon();
 
     const char* toString();
     /* (non-Javadoc)
      * @see j2d.iSite#setPolygon(j2d.NPoly)
      */
-    void setPolygon(PolygonSimple poly);
+    void setPolygon(PolygonSimple* poly);
     /* (non-Javadoc)
-     * @see j2d.iSite#setNeighbours(java.util.ArrayList)
+     * @see j2d.iSite#setNeighbours(java.util.std::vector)
      */
-    void setNeighbours(ArrayList<Site> list);
+    void setNeighbours(std::vector<Site*>* list);
     /* (non-Javadoc)
      * @see j2d.iSite#getNeighbours()
      */
-    ArrayList<Site> getNeighbours();
+    std::vector<Site*>* getNeighbours();
 
     /* (non-Javadoc)
      * @see j2d.iSite#getWeight()
@@ -80,8 +83,9 @@ public:
     /**
      * The sites are first ordered according to the x-axis and then according to the y axis
      */
-    int compareTo(Site b);
-    void paint(Graphics2D g);
+    int compareTo(Site* b);
+    //TODO:need to transfer to vtk method
+    //void paint(Graphics2D g);
     /* (non-Javadoc)
      * @see j2d.iSite#setPercentage(double)
      */
@@ -90,6 +94,9 @@ public:
      * @see j2d.iSite#getPercentage()
      */
     double getPercentage();
+
+    //get cellobject pointer
+    VoroCellObject* getCellObject();
 
     /* (non-Javadoc)
      * @see j2d.iSite#getPoint()
@@ -100,22 +107,22 @@ public:
      * @param point
      * @return
      */
-    double distance(Site point);
-    double distanceCircles(Site point);
-    ArrayList<Site> getOldNeighbors();
+    double distance(Site* point);
+    double distanceCircles(Site* point);
+    std::vector<Site*>* getOldNeighbours();
 
 protected:
-    const static double nearlyZero = 1E-10;
-    double weight=nearlyZero;
-    double percentage=nearlyZero;
+    constexpr static double nearlyZero_ = 1E-10;
+    double weight_;//=nearlyZero;
+    double percentage_;//=nearlyZero;
 
-    PolygonSimple polygon;
-    ArrayList<Site> neighbours;
+    PolygonSimple* polygon_;
+    std::vector<Site*>* neighbours_;
 
-    VoroCellObject cellObject;
+    VoroCellObject* cellObject_;
 private:
-    ArrayList<Site> oldNeighbors_;
-    void setOldNeighbors(ArrayList<Site> oldNeighbors);
+    std::vector<Site*>* oldNeighbours_;
+    void setOldNeighbors(std::vector<Site*>* oldNeighbours);
     /**
      * return the dual point of the plane which is projected, see Aurenhammer,1987, Power Diagrams
      * @param x

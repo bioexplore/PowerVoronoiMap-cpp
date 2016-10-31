@@ -1,59 +1,53 @@
 #include "site.h"
 using namespace voronoi;
 
-Site::Site(double x, double y):ASite(x,y)
+voronoi::Site::Site(double x, double y):AbstractSite(x,y)
 {}
 
-Site::Site(double x, double y, double weight):ASite(x,y,weight)
+voronoi::Site::Site(double x, double y, double weight):AbstractSite(x,y,weight)
 {}
 
-Site::Site(double x, double y, double weight, double percentage)
-{
-    super(x,y,weight,percentage);
-}
+voronoi::Site::Site(double x, double y, double weight, double percentage):
+    AbstractSite(x,y,weight,percentage)
+{}
 
-Object Site::getData()
+voronoi::VoroCellObject* voronoi::Site::getData()
 {
     return data_;
 }
 
-Site Site::clone()
+voronoi::Site voronoi::Site::clone()
 {
-    Site site=new Site(x, y, weight);
-    site.isDummy=this.isDummy;
-    site.originalObject=this.originalObject;
-    site.percentage=this.percentage;
+    Site site(x, y, weight_);
+    site.isDummy=isDummy;
+    //site.originalObject_=originalObject_;
+    site.percentage_=percentage_;
     return site;
 }
 
-Site Site::cloneZeroWeight()
+voronoi::Site voronoi::Site::cloneZeroWeight()
 {
-   Site site=new Site(x, y, 0);
+   Site site(x, y, 0);
    return site;
 }
 
-String Site::toString()
+void voronoi::Site::setAsDummy()
 {
-   // TODO Auto-generated method stub
-   return super.toString();
+   isDummy=true;
 }
 
-void Site::setAsDummy()
+void voronoi::Site::setData(VoroCellObject* child)
 {
-   this.isDummy=true;
+   data_=child;
 }
 
-void Site::setData(Object child)
+void voronoi::Site::setLastIncrease(double increase)
 {
-   this.data=child;
+   lastIncrease_=increase;
 }
 
-void Site::setLastIncrease(double increase)
-{
-   this.lastIncrease=increase;
-}
-
-void Site::paintLastIncrease(Graphics2D g, double radSize)
+/*
+void voronoi::Site::paintLastIncrease(Graphics2D g, double radSize)
 {
    int radius = (int) ((lastIncrease-1)*radSize);
 
@@ -62,15 +56,15 @@ void Site::paintLastIncrease(Graphics2D g, double radSize)
    else g.setColor(new Color(0,255,0,128));
    radius=Math.abs(radius);
    radius=Math.min((int)radSize, radius);
-   g.fillOval((int)this.getX()-radius, (int)this.getY()-radius, 2*radius, 2*radius);
+   g.fillOval((int)getX()-radius, (int)getY()-radius, 2*radius, 2*radius);
    g.setColor(Color.BLUE);
-   g.drawOval((int)this.getX()-radius, (int)this.getY()-radius, 2*radius, 2*radius);
+   g.drawOval((int)getX()-radius, (int)getY()-radius, 2*radius, 2*radius);
    g.setColor(Color.black);
    int width=1;
-   g.fillRect((int)this.getX()-width, (int)this.getY()-width, 2*width,2*width );
-}
+   g.fillRect((int)getX()-width, (int)getY()-width, 2*width,2*width );
+}*/
 
-double Site::getLastIncrease()
+double voronoi::Site::getLastIncrease()
 {
-   return lastIncrease;
+   return lastIncrease_;
 }

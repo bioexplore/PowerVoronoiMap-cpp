@@ -87,7 +87,7 @@ void Face::link(Face* f0,Vertex* v0,Vertex* v1)
 
 void Face::link(HullEdge* e)
 {
-    HullEdge* edge=getEdge(e->getStartPtr(),e->getEndPtr());
+    HullEdge* edge=getEdge(e->getStart(),e->getEnd());
     e->setTwin(edge);
     edge->setTwin(e);
 }

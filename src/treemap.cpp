@@ -1,93 +1,106 @@
+#include <ctime>
+#include <cstdlib>
+#include <iostream>
 #include "treemap.h"
+#include "tuple3id.h"
 
-//===========PUBLIC MEMBER FUNCS============\\
-voronoi::VoronoiTreemap::VoronoiTreemap()
+//===========PUBLIC MEMBER FUNCS============//
+voronoi::VoronoiTreemap::VoronoiTreemap():
+    alreadyDoneNodes_(0),amountAllNodes_(0),cellQueue_(NULL),coreSettings_(NULL),idToNode_(NULL),initialized_(false),levelsMaxIteration_(NULL),
+    numberThreads_(1),randomSeed_(21),relativePositions_(NULL),root_(NULL),rootIndex_(-1),rootPolygon_(NULL),showLeafs_(false),shrinkPercentage_(1),
+    statusObjects_(NULL),timeStart_(-1),timeEnd_(-1),treeData_(NULL),uniformWeights_(false),useBorder_(false)
 {
     init();
 }
 
-voronoi::VoronoiTreemap::VoronoiTreemap(StatusObject statusObject, bool multiThreaded)
+voronoi::VoronoiTreemap::VoronoiTreemap(voronoi::StatusObject* statusObject, bool multiThreaded):
+    alreadyDoneNodes_(0),amountAllNodes_(0),cellQueue_(NULL),coreSettings_(NULL),idToNode_(NULL),initialized_(false),levelsMaxIteration_(NULL),
+    numberThreads_(1),randomSeed_(21),relativePositions_(NULL),root_(NULL),rootIndex_(-1),rootPolygon_(NULL),showLeafs_(false),shrinkPercentage_(1),
+    statusObjects_(NULL),timeStart_(-1),timeEnd_(-1),treeData_(NULL),uniformWeights_(false),useBorder_(false)
 {
-    this(statusObject);
-
-    if (multiThreaded)
-        setNumberThreads(Runtime.getRuntime().availableProcessors());
+    init();
+    statusObjects_->push_back(statusObject);
 }
 
-voronoi::VoronoiTreemap::VoronoiTreemap(StatusObject statusObject)
+voronoi::VoronoiTreemap::VoronoiTreemap(voronoi::StatusObject* statusObject):
+    alreadyDoneNodes_(0),amountAllNodes_(0),cellQueue_(NULL),coreSettings_(NULL),idToNode_(NULL),initialized_(false),levelsMaxIteration_(NULL),
+    numberThreads_(1),randomSeed_(21),relativePositions_(NULL),root_(NULL),rootIndex_(-1),rootPolygon_(NULL),showLeafs_(false),shrinkPercentage_(1),
+    statusObjects_(NULL),timeStart_(-1),timeEnd_(-1),treeData_(NULL),uniformWeights_(false),useBorder_(false)
 {
-    this();
-    this.statusObject.add(statusObject);
+    init();
+    statusObjects_->push_back(statusObject);
 }
 
 /** when a node is finished the status object is notified. **/
 
-HashMap<Integer, VoroNode> voronoi::VoronoiTreemap::getIdToNode()
+std::unordered_map<int,voronoi::VoroNode*>* voronoi::VoronoiTreemap::getIdToNode()
 {
-    return idToNode;
+    return idToNode_;
 }
 
 void voronoi::VoronoiTreemap::compute()
 {
-    if (rootPolygon == null)
-        throw new RuntimeException("Root Polygon not set.");
-    timeStart = System.currentTimeMillis();
+    if (rootPolygon_ == NULL){
+        //TODO:need using exception
+        return;
+        //throw new RuntimeException("Root Polygon not set.");
+    }
+    timeStart_ = std::time(0);
     initVoroNodes();
-    cellQueue.add(root);
+    cellQueue_->push_back(root_);
     startComputeThreads();
 }
 
+//FIXME:to add threads
 void voronoi::VoronoiTreemap::computeLocked()
 {
-    try {
+    /*try {
         lock.acquire();
     } catch (InterruptedException e) {
         e.printStackTrace();
-    }
+    }*/
     compute();
-    try {
+    /*try {
         lock.acquire();
         lock.release();
     } catch (InterruptedException e) {
         e.printStackTrace();
-    }
+    }*/
 }
-void voronoi::VoronoiTreemap::setReferenceMap(ArrayList<Tuple3ID> relativePositions)
+void voronoi::VoronoiTreemap::setReferenceMap(std::vector<voronoi::Tuple3ID*>* relativePositions)
 {
-    for (Tuple3ID tuple : relativePositions)
+    for(std::vector<Tuple3ID*>::iterator tuple=relativePositions->begin();tuple!=relativePositions->end();++tuple)
     {
-        VoroNode voroNode = null;
-        voroNode = idToNode.get(tuple.id);
-        if (voroNode != null)
-        {
-
-            voroNode.setRelativeVector(new Point2D(tuple.valueX,
-                                                   tuple.valueY));
-        } else
-            System.out.println("node id could not be found for setting reference position: "
-                             + tuple.id);
+        int id=(*tuple)->id;
+        double x=(*tuple)->valueX;
+        double y=(*tuple)->valueY;
+        VoroNode* voroNode = idToNode_->find(id)->second;
+        if (voroNode != NULL)
+            voroNode->setRelativeVector(Point2D(x,y));
+        else
+            std::cout<<"Node id could not be found for setting reference position: "<<id<<std::endl;
     }
 }
 
 bool voronoi::VoronoiTreemap::getShowLeafs()
 {
-    return showLeafs;
+    return showLeafs_;
 }
 //@Override
-Iterator<VoroNode> voronoi::VoronoiTreemap::iterator()
+/*Iterator<VoroNode> voronoi::VoronoiTreemap::iterator()
 {
     return new NodeIterator(root);
-}
+}*/
 
 //@Override
 //synchronized
 void voronoi::VoronoiTreemap::finished()
 {
-    for (StatusObject statusObject : this.statusObject)
-        statusObject.finished();
-    lock.release();
+    for(std::vector<StatusObject*>::iterator statusObject=statusObjects_->begin();statusObject!=statusObjects_->end();++statusObject)
+       (*statusObject)->finished();
+    //lock.release();
 }
-
+/*
 void voronoi::VoronoiTreemap::drawTreemap(Graphics2D g)
 {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -97,15 +110,15 @@ void voronoi::VoronoiTreemap::drawTreemap(Graphics2D g)
     for (VoroNode node : this)
     {
         int height = node.getHeight();
-        if (node.getChildren() == null)
+        if (node.getChildren() == NULL)
         {
             lastNodes++;
         }
         Site site = node.getSite();
-        if (site != null)
+        if (site != NULL)
         {
             PolygonSimple poly = site.getPolygon();
-            if (poly != null)
+            if (poly != NULL)
             {
                 // poly.shrinkForBorder(0.95);
                 amountPolygons++;
@@ -115,76 +128,77 @@ void voronoi::VoronoiTreemap::drawTreemap(Graphics2D g)
 
     }
 }
+*/
 
 void voronoi::VoronoiTreemap::setShrinkPercentage(double shrinkPercentage)
 {
-    this.shrinkPercentage = shrinkPercentage;
+    shrinkPercentage_ = shrinkPercentage;
 }
 
 
 double voronoi::VoronoiTreemap::getShrinkPercentage()
 {
-    return shrinkPercentage;
+    return shrinkPercentage_;
 }
 
 void voronoi::VoronoiTreemap::setUseBorder(bool useBorder)
 {
-    this.useBorder = useBorder;
+    useBorder_ = useBorder;
 }
 
 
 bool voronoi::VoronoiTreemap::getUseBorder()
 {
-    return useBorder;
+    return useBorder_;
 }
 
 void voronoi::VoronoiTreemap::setNumberMaxIterations(int numberMaxIterations)
 {
-    coreSettings.maxIterat = numberMaxIterations;
+    coreSettings_->maxIteration = numberMaxIterations;
 }
 
 int voronoi::VoronoiTreemap::getNumberMaxIterations()
 {
-    return coreSettings.maxIterat;
+    return coreSettings_->maxIteration;
 }
 
 void voronoi::VoronoiTreemap::setCancelOnThreshold(bool cancelOnThreshold)
 {
-    this.coreSettings.cancelAreaError = cancelOnThreshold;
+    coreSettings_->cancelAreaError = cancelOnThreshold;
 }
 
 bool voronoi::VoronoiTreemap::getCancelOnThreshold()
 {
-    return coreSettings.cancelAreaError;
+    return coreSettings_->cancelAreaError;
 }
 
 void voronoi::VoronoiTreemap::setCancelOnMaxIteration(bool cancelOnMaxIterat)
 {
-    coreSettings.cancelMaxIterat = cancelOnMaxIterat;
+    coreSettings_->cancelMaxIteration = cancelOnMaxIterat;
 }
 
 
 bool voronoi::VoronoiTreemap::getCancelOnMaxIteration()
 {
-    return coreSettings.cancelMaxIterat;
+    return coreSettings_->cancelMaxIteration;
 }
 
-void voronoi::VoronoiTreemap::setRootPolygon(PolygonSimple rootPolygon)
+void voronoi::VoronoiTreemap::setRootPolygon(voronoi::PolygonSimple* rootPolygon)
 {
-    this.rootPolygon = rootPolygon;
-    if (root != null)
-        root.setPolygon(rootPolygon);
+    rootPolygon_ = rootPolygon;
+    if (root_ != NULL)
+        root_->setPolygon(rootPolygon);
 }
 
 
 void voronoi::VoronoiTreemap::setRootRectangle(double x, double y, double width, double height)
 {
-    rootPolygon = new PolygonSimple();
-    rootPolygon.add(x, y);
-    rootPolygon.add(x + width, y);
-    rootPolygon.add(x + width, y + height);
-    rootPolygon.add(x, y + height);
-    root.setPolygon(rootPolygon);
+    rootPolygon_ = new PolygonSimple();
+    rootPolygon_->add(x, y);
+    rootPolygon_->add(x + width, y);
+    rootPolygon_->add(x + width, y + height);
+    rootPolygon_->add(x, y + height);
+    root_->setPolygon(rootPolygon_);
 }
 
 /**
@@ -192,15 +206,15 @@ void voronoi::VoronoiTreemap::setRootRectangle(double x, double y, double width,
  *
  * @param rectangle
  */
-void voronoi::VoronoiTreemap::setRootRectangle(Rectangle2D.Double rectangle)
+void voronoi::VoronoiTreemap::setRootRectangle(voronoi::Rectangle2D* rectangle)
 {
-    setRootRectangle(rectangle.getX(), rectangle.getY(),
-                     rectangle.getWidth(), rectangle.getHeight());
+    setRootRectangle(rectangle->getX(), rectangle->getY(),
+                     rectangle->getWidth(), rectangle->getHeight());
 }
 
-PolygonSimple voronoi::VoronoiTreemap::getRootPolygon()
+voronoi::PolygonSimple* voronoi::VoronoiTreemap::getRootPolygon()
 {
-    return rootPolygon;
+    return rootPolygon_;
 }
 
 
@@ -208,12 +222,11 @@ void voronoi::VoronoiTreemap::setNumberThreads(int numberThreads)
 {
     if (numberThreads >= 1)
     {
-        this.numberThreads = numberThreads;
+        numberThreads_ = numberThreads;
     } else
     {
-        this.numberThreads = 1;
+        numberThreads_ = 1;
     }
-
 }
 
 /**
@@ -221,101 +234,132 @@ void voronoi::VoronoiTreemap::setNumberThreads(int numberThreads)
  */
 int voronoi::VoronoiTreemap::getNumberThreads()
 {
-    return numberThreads;
+    return numberThreads_;
 }
 
-void voronoi::VoronoiTreemap::setStatusObject(StatusObject statusObject)
+void voronoi::VoronoiTreemap::setStatusObject(voronoi::StatusObject* statusObject)
 {
-    this.statusObject.add(statusObject);
+    statusObjects_->push_back(statusObject);
 }
 
-StatusObject voronoi::VoronoiTreemap::getStatusObject()
+voronoi::StatusObject* voronoi::VoronoiTreemap::getStatusObject()
 {
-    return statusObject.get(0);
+    StatusObject* statusObj=statusObjects_->at(0);
+    statusObjects_->erase(statusObjects_->begin());
+    return statusObj;
 }
 
 //@Override
-void voronoi::VoronoiTreemap::finishedNode(int Node, int layer, int[] children,
-                  PolygonSimple[] polygons)
+void voronoi::VoronoiTreemap::finishedNode(int Node, int layer, int* children, voronoi::PolygonSimple* polygons)
 {
-    for (StatusObject statusObject : this.statusObject)
-        statusObject.finishedNode(Node, layer, children, polygons);
+    for(std::vector<StatusObject*>::iterator statusObj=statusObjects_->begin();statusObj!=statusObjects_->end();++statusObj)
+        (*statusObj)->finishedNode(Node,layer,children,polygons);
 }
 
-void voronoi::VoronoiTreemap::setTree(ArrayList<ArrayList<Integer>> treeStructure)
+void voronoi::VoronoiTreemap::setTree(std::vector<std::vector<int> >& treeStructure)
 {
-    idToNode = new HashMap<Integer, VoroNode>();
-
+    if (idToNode_==NULL)
+        idToNode_ = new std::unordered_map<int, VoroNode*>();
     for (int i = 0; i < treeStructure.size(); i++)
     {
-        ArrayList<Integer> adj = treeStructure.get(i);
-        VoroNode node = new VoroNode(i, adj.size() - 1);
-        idToNode.put(i, node);
-        node.setTreemap(this);
+        std::vector<int>& adj = treeStructure.at(i);
+        VoroNode* node = new VoroNode(i, adj.size() - 1);
+        idToNode_->insert({i, node});
+        node->setTreemap(this);
     }
-
-    root = idToNode.get(rootIndex);
-
-    addChildren(idToNode, treeStructure, rootIndex);
-
-    for (VoroNode voroNode : idToNode.values())
+    const auto& nodePair1=idToNode_->find(rootIndex_);
+    root_ =nodePair1->second; 
+    addChildren(idToNode_, treeStructure, rootIndex_);
+    for(const auto& nodePair:*idToNode_)
     {
-        double x = rand.nextDouble();
-        double y = rand.nextDouble();
-        voroNode.setRelativeVector(new Point2D(x, y));
+        double randx = ((double)std::rand()/(RAND_MAX));
+        double randy = ((double)std::rand()/(RAND_MAX));
+        VoroNode* node=nodePair.second;
+        node->setRelativeVector(Point2D(randx, randy));
     }
-
-    root.setVoroPolygon(rootPolygon);
+    root_->setVoroPolygon(rootPolygon_);
 }
 
 void voronoi::VoronoiTreemap::clear()
 {
+    alreadyDoneNodes_=0;
+    amountAllNodes_=0;
+    if(cellQueue_) 
+        delete cellQueue_;
+    cellQueue_=NULL;
+    if(coreSettings_) 
+        delete coreSettings_;
+    coreSettings_=NULL;
+    if(idToNode_)
+        delete idToNode_;
+    idToNode_=NULL;
+    initialized_=false;
+    if(levelsMaxIteration_)
+        delete levelsMaxIteration_;
+    levelsMaxIteration_=NULL;
+    numberThreads_=1;
+    randomSeed_=21;
+    if(relativePositions_)
+        delete relativePositions_;
+    relativePositions_=NULL;
+    if(root_)
+        delete root_;
+    root_=NULL;
+    rootIndex_=-1;
+    if(rootPolygon_)
+        delete rootPolygon_;
+    rootPolygon_=NULL;
+    showLeafs_=false;
+    shrinkPercentage_=1;
+    if(statusObjects_)
+        delete statusObjects_;
+    statusObjects_=NULL;
+    timeStart_=-1;
+    timeEnd_=-1;
+    if(treeData_)
+        delete treeData_;
+    treeData_=NULL;
+    uniformWeights_=false;
+    useBorder_=false;
     init();
-}
-
-void voronoi::VoronoiTreemap::setRandomSeed(long seed)
-{
-    randomSeed = seed;
-    rand.setSeed(seed);
-}
-
-long voronoi::VoronoiTreemap::getRandomSeed()
-{
-    return randomSeed;
 }
 
 void voronoi::VoronoiTreemap::setErrorAreaThreshold(double d)
 {
-    coreSettings.errorThreshold = d;
+    coreSettings_->errorThreshold = d;
 
 }
 
-void voronoi::VoronoiTreemap::setTreeData(TreeData treeData)
+void voronoi::VoronoiTreemap::setTreeData(voronoi::TreeData* treeData)
 {
-    this.treeData = treeData;
-    rootIndex = treeData.rootIndex;
+    treeData_ = treeData;
+    rootIndex_ = treeData->getRootIndex();
 
-    setTree(treeData.tree);
-    root.setVoroPolygon(rootPolygon);
+    setTree(*(treeData->getTree()));
+    root_->setVoroPolygon(rootPolygon_);
 
     // set names and weights
-    if (treeData != null && treeData.nodeAtt != null)
+    if (treeData != NULL && treeData->getNodeAttDict() != NULL)
     {
-        for (Integer id : idToNode.keySet())
+        for(auto& nodePair:*idToNode_)
         {
-            VoroNode voroNode = idToNode.get(id);
-            Node node = treeData.nodeAtt.get(id);
-            if(node==null) continue;
+            VoroNode* voroNode = nodePair.second;
+            int id=nodePair.first;
+            const auto& tmp = treeData->getNodeAttDict()->find(id);
+            if(tmp==treeData->getNodeAttDict()->end()) continue;
+            TreeData::Node* node=tmp->second;
             if (!getUniFormWeights())
-                voroNode.setWeight(node.weight);
-            voroNode.setName(node.name);
+                voroNode->setWeight(node->weight);
+            voroNode->setName(node->name);
         }
     }
 
 }
 
-void voronoi::VoronoiTreemap::readEdgeList(String file)
+//FIXME: redefine this func
+void voronoi::VoronoiTreemap::readEdgeList(std::string file)
 {
+    /*
     try
     {
         TreeData data = IO.readEdgeList(file);
@@ -324,167 +368,159 @@ void voronoi::VoronoiTreemap::readEdgeList(String file)
     {
         e.printStackTrace();
     }
+    */
 }
 
 bool voronoi::VoronoiTreemap::getUniFormWeights()
 {
-    return uniformWeights;
+    return uniformWeights_;
 }
 
 void voronoi::VoronoiTreemap::setUniformWeights(bool considerWeights)
 {
-    this.uniformWeights = considerWeights;
-    if (uniformWeights)
-        for (VoroNode node : idToNode.values())
-            node.setWeight(1.0);
+    uniformWeights_ = considerWeights;
+    if (uniformWeights_)
+        for (auto& nodePair : *idToNode_)
+           nodePair.second->setWeight(1.0);
 }
 
-void voronoi::VoronoiTreemap::setNumberIterationsLevel(int[] levelsMaxIteration)
+void voronoi::VoronoiTreemap::setNumberIterationsLevel(int* levelsMaxIteration)
 {
-    this.levelsMaxIteration = levelsMaxIteration;
+    levelsMaxIteration_ = levelsMaxIteration;
 }
 
-//==============PROTECTED MEMBER FUNCTIONS=============\\
+//==============PROTECTED MEMBER FUNCTIONS=============//
 void voronoi::VoronoiTreemap::recalculatePercentage()
 {
-    amountAllNodes = 0;
-    alreadyDoneNodes = 0;
-    root.calculateWeights();
+    amountAllNodes_ = 0;
+    alreadyDoneNodes_ = 0;
+    root_->calculateWeights();
 }
 
-void voronoi::VoronoiTreemap::setRootCell(VoroNode cell)
+void voronoi::VoronoiTreemap::setRootCell(voronoi::VoroNode* cell)
 {
-    this.root = cell;
-    root.setHeight(1);
-    root.setWantedPercentage(0);
+    root_ = cell;
+    root_->setHeight(1);
+    root_->setWantedPercentage(0);
 }
 
-VoroNode voronoi::VoronoiTreemap::getRootCell()
+voronoi::VoroNode* voronoi::VoronoiTreemap::getRootCell()
 {
-    return root;
+    return root_;
 }
 
 void voronoi::VoronoiTreemap::init()
 {
-    initialized = false;
-    useBorder = false;
-    shrinkPercentage = 1;
-    showLeafs = false;
-    numberThreads = 1;
-    root = null;
-    rootPolygon = null;
-    if (cellQueue != null)
-        cellQueue.clear();
-    statusObject = new ArrayList<StatusObject>();
-    rand = new Random(randomSeed);
-    if (idToNode != null)
-        idToNode.clear();
-    lock = new Semaphore(1);
+    cellQueue_=new std::vector<VoroNode*>;
+    coreSettings_=new VoroSettings;
+    idToNode_=new std::unordered_map<int,VoroNode*>;
+    statusObjects_=new std::vector<StatusObject*>;
+    rootPolygon_=new PolygonSimple;
 }
 
 void voronoi::VoronoiTreemap::initVoroNodes()
 {
-    if (!initialized && root != null)
+    if (!initialized_ && root_ != NULL)
     {
-        initialized = true;
-        cellQueue.clear();
-        root.calculateWeights();
-        setRelativePositions(relativePositions);
+        initialized_ = true;
+        cellQueue_->clear();
+        root_->calculateWeights();
+        setRelativePositions(relativePositions_);
     }
 }
-void voronoi::VoronoiTreemap::setSettingsToVoroNode(VoroNode node)
+void voronoi::VoronoiTreemap::setSettingsToVoroNode(voronoi::VoroNode* node)
 {
-    node.setTreemap(this);
+    node->setTreemap(this);
 }
 //final
-void voronoi::VoronoiTreemap::addChildren(HashMap<Integer, VoroNode> idToNode,
-                       final ArrayList<ArrayList<Integer>> adjLists, int currentPos)
+void voronoi::VoronoiTreemap::addChildren(std::unordered_map<int,voronoi::VoroNode*>* idToNode,std::vector<std::vector<int> >& adjLists, int currentPos)
 {
-    ArrayList<Integer> childList = adjLists.get(currentPos);
-    if (childList == null || childList.size() == 1)
+    std::vector<int> childList = adjLists.at(currentPos);
+    if ( childList.size() == 1)
         return;
 
-    Integer parentId = childList.get(0);
-    VoroNode voroParent = idToNode.get(parentId);
+    int parentId = childList.at(0);
+    VoroNode* voroParent = idToNode->find(parentId)->second;
 
     // add children to parent
 
     for (int i = 1; i < childList.size(); i++)
     {
-        Integer childId = childList.get(i);
-        VoroNode voroChild = idToNode.get(childId);
-        voroParent.addChild(voroChild);
-        voroChild.setParent(voroParent);
+        int childId = childList.at(i);
+        VoroNode *voroChild = idToNode->find(childId)->second;
+        voroParent->addChild(voroChild);
+        voroChild->setParent(voroParent);
     }
     // add children to children
     for (int i = 1; i < childList.size(); i++)
     {
-        Integer childId = childList.get(i);
+        int childId = childList.at(i);
         addChildren(idToNode, adjLists, childId);
     }
-
 }
 void voronoi::VoronoiTreemap::setAmountNodes(int amountNodes)
 {
-    this.amountAllNodes = amountNodes;
+    amountAllNodes_ = amountNodes;
 }
 
 int voronoi::VoronoiTreemap::getAmountNodes()
 {
-    return amountAllNodes;
+    return amountAllNodes_;
 }
 
+/*
 void voronoi::VoronoiTreemap::drawTreemapWithComponents(Graphics2D g)
 {
     for (VoroNode child : this)
     {
-        JPolygon jp = new JPolygon(child.getNodeID(), new Integer(
+        JPolygon jp = new JPolygon(child.getNodeID(), new int(
                                        child.getNodeID()).toString());
     }
 }
 Graphics2D voronoi::VoronoiTreemap::getGraphics()
 {
     return graphics;
-}
+}*/
 
-//===========PRIVATE MEMBER FUNCS============\\
+//===========PRIVATE MEMBER FUNCS============//
 void startComputeThreads()
 {
-    this.runningThreads = Collections.newSetFromMap(new ConcurrentHashMap<VoroCPU, bool>());
+    runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
     for (int i = 0; i < getNumberThreads(); i++)
         new VoroCPU(cellQueue, this, runningThreads).start();
 }
 
- void setRelativePositions(ArrayList<Tuple3ID> relativePositions)
- {
-    if (relativePositions == null)
+void setRelativePositions(std::vector<voronoi::Tuple3ID*>* relativePositions)
+{
+    if (relativePositions_ == NULL)
     {
-        for (VoroNode voroNode : idToNode.values())
+        for (auto& voroNodePair : *idToNode_)
         {
-            double x = rand.nextDouble();
-            double y = rand.nextDouble();
-            voroNode.setRelativeVector(new Point2D(x, y));
+            double x = ((double)std::rand()/RAND_MAX);
+            double y = ((double)std::rand()/RAND_MAX);
+            VoroNode* voroNode=voroNodePair->second;
+            voroNode->setRelativeVector(Point2D(x, y));
         }
         return;
     }
-
     setReferenceMap(relativePositions);
-
 }
 void setShowLeafs(bool showLeafs)
 {
-    this.showLeafs = showLeafs;
+    showLeafs_ = showLeafs;
 }
 
+/*
 void setGraphics(Graphics2D graphics)
 {
-    this.graphics = graphics;
+    graphics = graphics;
 }
-
+*/
+/*
 voronoi::VoronoiTreemap::NodeIterator::NodeIterator(VoroNode root)
 {
     stack = new Stack<VoroNode>();
-    stack.addAll(root.getChildren());
+    stack.addAll(root_->getChildren());
 
 }
 
@@ -502,8 +538,7 @@ bool voronoi::VoronoiTreemap::NodeIterator::hasNext()
 VoroNode voronoi::VoronoiTreemap::NodeIterator::next()
 {
     VoroNode t = stack.pop();
-    if (t != null && t.getChildren() != null
-            && t.getChildren().size() > 0)
+    if (t != NULL && t.getChildren() != NULL && t.getChildren().size() > 0)
     {
         stack.addAll(t.getChildren());
     }
@@ -515,3 +550,4 @@ void voronoi::VoronoiTreemap::NodeIterator::remove()
 {
 
 }
+*/

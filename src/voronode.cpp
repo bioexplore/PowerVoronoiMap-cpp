@@ -1,39 +1,63 @@
+#include <iostream>
+#include <limits>
+#include <vector>
 #include "voronode.h"
+#include "treemap.h"
 
-voronoi::VoroNode::VoroNode(int nodeID)
+voronoi::VoroNode::VoroNode(int nodeID):
+    children_(NULL),core_(NULL),height_(0),name(""),nodeID_(nodeID),parent_(NULL),
+    polygon_(NULL),relativeVector_(-1,-1),site_(NULL),toConsider_(false),treemap_(NULL),
+    wantedPercentage_(0),weight_(0)
+{}
+
+voronoi::VoroNode::VoroNode(int nodeID, int numberChildren):
+    children_(NULL),core_(NULL),height_(0),name(""),nodeID_(nodeID),parent_(NULL),
+    polygon_(NULL),relativeVector_(-1,-1),site_(NULL),toConsider_(false),treemap_(NULL),
+    wantedPercentage_(0),weight_(0)
 {
-    this.nodeID = nodeID;
-    relativeVector=new Point2D();
+    children_=new std::vector<VoroNode*>(numberChildren);
 }
 
-voronoi::VoroNode::VoroNode(int nodeID, int numberChildren){
-    this(nodeID);
-    children=new ArrayList<VoroNode>(numberChildren);
+voronoi::VoroNode::~VoroNode()
+{
+    if(children_) delete children_;
+    children_=NULL;
 }
 
-void voronoi::VoroNode::calculateWeights() {
-    treemap.amountAllNodes++;
-    if (children == null || children.size() == 0) {
+void voronoi::VoroNode::calculateWeights() 
+{
+    if(!treemap_)
+    {
+        std::cerr<<"TreeMap member is not set for VoroNode"<<std::endl;
+        return;
+    }
+    treemap_->amountAllNodes_++;//this can be invoked because Voronode is friend class of VoronoiTreemap
+    if (children_ == NULL || children_->size() == 0) 
+    {
         return;
     }
     double sum = 0;
-    for (VoroNode child : children) {
-        child.calculateWeights();
-        sum += child.getWeight();
+    for (VoroNode* child : *children_) 
+    {
+        child->calculateWeights();
+        sum += child->getWeight();
     }
-
-    for (VoroNode child : children) {
-        child.setWantedPercentage(child.getWeight() / sum);
+    for (VoroNode* child : *children_) 
+    {
+        child->setWantedPercentage(child->getWeight() / sum);
     }
-    this.weight = sum;
-
+    weight_ = sum;
 }
 
-void voronoi::VoroNode::setSpiralRelativeCoordinates(){
-    if (children == null || children.size() == 0) {
+//TODO:need to redefine
+void voronoi::VoroNode::setSpiralRelativeCoordinates()
+{
+    if (children_ == NULL || children_->size() == 0) 
+    {
         return;
     }
-    ArrayList<VoroNode> nodes=children;
+    /*
+    std::vector<VoroNode*>* nodes=children_;
     Collections.sort(nodes,new Comparator<VoroNode>()
     {
          //@Override
@@ -47,7 +71,8 @@ void voronoi::VoroNode::setSpiralRelativeCoordinates(){
 
     int i=0;
     Random rand=new Random();
-    for (VoroNode voroNode : nodes) {
+    for (VoroNode voroNode : nodes) 
+    {
         double angle=Math.PI*2.0*(i*1.0/nodes.size());
         double b=1;
         double a=1;
@@ -60,126 +85,142 @@ void voronoi::VoroNode::setSpiralRelativeCoordinates(){
         voroNode.setRelativeVector(new Point2D(x, y));
         i++;
     }
-    for (VoroNode child : children)
+    for (VoroNode child : children_)
         child.setSpiralRelativeCoordinates();
-}
-void voronoi::VoroNode::setNodeID(int nodeID) {
-    this.nodeID = nodeID;
+    */
 }
 
-int voronoi::VoroNode::getNodeID() {
-    return nodeID;
+void voronoi::VoroNode::setNodeID(int nodeID) 
+{
+    nodeID_ = nodeID;
 }
 
-void voronoi::VoroNode::setParent(VoroNode parent) {
-    this.parent = parent;
+int voronoi::VoroNode::getNodeID() 
+{
+    return nodeID_;
 }
 
-VoroNode voronoi::VoroNode::getParent() {
-    return parent;
+void voronoi::VoroNode::setParent(voronoi::VoroNode* parent) 
+{
+    parent_ = parent;
 }
 
-void voronoi::VoroNode::setChildren(ArrayList<VoroNode> children) {
-    this.children = children;
+voronoi::VoroNode* voronoi::VoroNode::getParent()
+{
+    return parent_;
 }
 
-ArrayList<VoroNode> voronoi::VoroNode::getChildren() {
-    return children;
+void voronoi::VoroNode::setChildren(std::vector<voronoi::VoroNode*>* children_) 
+{
+    children_ = children_;
 }
 
-void voronoi::VoroNode::setPolygon(PolygonSimple polygon) {
-    this.polygon = polygon;
+std::vector<voronoi::VoroNode*>* voronoi::VoroNode::getChildren() 
+{
+    return children_;
 }
 
-PolygonSimple voronoi::VoroNode::getPolygon() {
-    return polygon;
+void voronoi::VoroNode::setPolygon(voronoi::PolygonSimple* polygon) 
+{
+    polygon_ = polygon;
 }
 
-void voronoi::VoroNode::setToConsider(boolean toConsider) {
-    this.toConsider = toConsider;
+voronoi::PolygonSimple* voronoi::VoroNode::getPolygon() 
+{
+    return polygon_;
 }
 
-boolean voronoi::VoroNode::isToConsider() {
-    return toConsider;
+void voronoi::VoroNode::setToConsider(bool toConsider)
+{
+    toConsider = toConsider;
 }
 
-void voronoi::VoroNode::setWantedPercentage(double percentage) {
-    this.weight=percentage;
-    this.wantedPercentage = percentage;
-    if (site != null)
-        site.setPercentage(percentage);
+bool voronoi::VoroNode::isToConsider()
+{
+    return toConsider_;
 }
 
-double voronoi::VoroNode::getWantedPercentage() {
-    return wantedPercentage;
+void voronoi::VoroNode::setWantedPercentage(double percentage)
+{
+    weight_=percentage;
+    wantedPercentage_ = percentage;
+    if (site_ != NULL)
+        site_->setPercentage(percentage);
 }
 
-void voronoi::VoroNode::addChild(VoroNode child) {
-    if (children == null) {
-        children = new ArrayList<VoroNode>();
+double voronoi::VoroNode::getWantedPercentage()
+{
+    return wantedPercentage_;
+}
+
+void voronoi::VoroNode::addChild(voronoi::VoroNode* child)
+{
+    if (children_ == NULL)
+    {
+        children_ = new std::vector<VoroNode*>();
     }
-    children.add(child);
-    child.parent = this;
-    child.treemap = treemap;
-    child.height = height + 1;
+    children_->push_back(child);
+    child->parent_ = this;
+    child->treemap_ = treemap_;
+    child->height_ = height_ + 1;
 }
 
 void voronoi::VoroNode::iterate()
 {
-    if (children == null || children.size() == 0)
+    if (children_ == NULL || children_->size() == 0)
         return;
-    if (site != null)
-        polygon=this.site.getPolygon();
+    if (site_ != NULL)
+        polygon_=site_->getPolygon();
 
     scaleRelativeVectors();
-    if (this.core == null) {
-        core = new VoronoiCore(this.polygon);
+    if (core_ == NULL) 
+    {
+        core_ = new VoronoiCore(polygon_);
         setSettingsToCore();
-        // add each children as a site
-        for (VoroNode child : children) {
-            Point2D p = polygon.getRelativePosition(child.relativeVector);
-
-            Site s = new Site(p.getX(), p.getY());
-
-            s.setPercentage(child.wantedPercentage);
-            s.setData(child);
-            core.addSite(s);
-            child.setSite(s);
-            s.cellObject = child;
+        // add each children_ as a site
+        for (VoroNode* child : *children_)
+        {
+            Point2D p = polygon_->getRelativePosition(child->relativeVector_);
+            Site* s = new Site(p.getX(), p.getY());
+            s->setPercentage(child->wantedPercentage_);
+            s->setData(child);
+            core_->addSite(s);
+            child->setSite(s);
+            s->cellObject_ = child;//Voronode is friend class of Site
         }
-    } else {
-        // move my children so that they are in my polygon
+    } else 
+    {
+        // move my children_ so that they are in my polygon
         // use their relative Vector for that
-        core = new VoronoiCore(polygon);
+        core_ = new VoronoiCore(polygon_);
         setSettingsToCore();
-        for (VoroNode child : children) {
-
-            if (child.getWantedPercentage() > 0) {
-                Point2D pos = null;
-                // if (getParent() != null) {
-                if (child.relativeVector != null) {
-                    pos = polygon.getRelativePosition(child.relativeVector);
-                } else {
-                    pos = polygon.getInnerPoint();
+        for (VoroNode* child : *children_) 
+        {
+            if (child->getWantedPercentage() > 0) 
+            {
+                //FIXME: need to fix
+                Point2D pos;
+                if (child->relativeVector_.x !=-1 && child->relativeVector_.y !=-1 ) 
+                {
+                    pos = polygon_->getRelativePosition(child->relativeVector_);
+                } else 
+                {
+                    pos = polygon_->getInnerPoint();
                 }
-                child.site.setXY(pos.getX(), pos.getY());
-
-                core.addSite(child.site);
+                child->site_->setXY(pos.getX(), pos.getY());
+                core_->addSite(child->site_);
             }
         }
-
     }
-
-
-    core.doIterate();
-
-    if (treemap.getUseBorder()) {
-        double shrinkPercentage=treemap.getShrinkPercentage();
-        int length = core.getSites().size;
-        Site[] sites = core.getSites().array;
-        for (int i = 0; i < length; i++) {
-            Site s = sites[i];
-            s.getPolygon().shrinkForBorder(shrinkPercentage);
+    core_->doIterate();
+    if (treemap_->getUseBorder()) 
+    {
+        double shrinkPercentage=treemap_->getShrinkPercentage();
+        std::vector<Site*>* siteList=core_->getSites();
+        int length = siteList->size();
+        for(Site* site:*siteList)
+        {
+            site->getPolygon()->shrinkForBorder(shrinkPercentage);
         }
     }
 }
@@ -188,171 +229,208 @@ void voronoi::VoroNode::iterate()
  * Scales the relative vectors of the child nodes to the size of our current
  * polygon. Doing this helps to preserve the mental map.
  */
-void voronoi::VoroNode::scaleRelativeVectors() {
-    if (getChildren() == null)
+void voronoi::VoroNode::scaleRelativeVectors() 
+{
+    if (children_ == NULL)
         return;
 
-    if(polygon==null && getParent().getChildren().size()==1){
+    if(polygon_==NULL && parent_->children_->size()==1)
+    {
+        //TODO:need to define clone function of PolygonSimple
         //clone from daddy
-        polygon=getParent().getPolygon().clone();
+        polygon_=parent_->polygon_->clone();
     }
 
-    if (getChildren().size() == 1) {
-        VoroNode child = getChildren().get(0);
-        child.setRelativeVector(polygon.getInnerPoint());
+    if (children_->size() == 1) 
+    {
+        VoroNode* child = children_->at(0);
+        child->setRelativeVector(polygon_->getInnerPoint());
         return;
     }
 
-    Rectangle bounds = polygon.getBounds();
-
-    double minX = Double.MAX_VALUE;
-    double minY = Double.MAX_VALUE;
-    double maxX = Double.MIN_VALUE;
-    double maxY = Double.MIN_VALUE;
-
+    Rectangle2D* bounds = polygon_->getBounds();
+    double minX = std::numeric_limits<double>::max();
+    double minY = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::min();
+    double maxY = std::numeric_limits<double>::min();
     double localCenterX = 0;
     double localCenterY = 0;
-    for (VoroNode child : getChildren()) {
-        Point2D pos = child.getRelativeVector();
-        // TODO
-        if (pos == null) {
-            pos=this.polygon.getInnerPoint();
+    for (VoroNode* child : *children_) 
+    {
+        Point2D pos = child->getRelativeVector();
+        // TODO:negative means outsiede polygon
+        if (pos.negative()) 
+        {
+            pos=polygon_->getInnerPoint();
         }
-
         localCenterX += pos.getX();
         localCenterY += pos.getY();
-
-        if (pos.getX() < minX) {
+        if (pos.getX() < minX) 
+        {
             minX = pos.getX();
         }
-        if (pos.getX() > maxX) {
+        if (pos.getX() > maxX) 
+        {
             maxX = pos.getX();
         }
-        if (pos.getY() < minY) {
+        if (pos.getY() < minY) 
+        {
             minY = pos.getY();
         }
-        if (pos.getY() > maxY) {
+        if (pos.getY() > maxY) 
+        {
             maxY = pos.getY();
         }
     }
-    localCenterX = localCenterX / getChildren().size();
-    localCenterY = localCenterY / getChildren().size();
+    localCenterX = localCenterX / children_->size();
+    localCenterY = localCenterY / children_->size();
 
-    double scaleX = (bounds.getWidth() / (maxX - minX)) * 0.9;
-    double scaleY = (bounds.getHeight() / (maxY - minY)) * 0.9;
-    double centerX = bounds.getCenterX();
-    double centerY = bounds.getCenterY();
+    double scaleX = (bounds->getWidth() / (maxX - minX)) * 0.9;
+    double scaleY = (bounds->getHeight() / (maxY - minY)) * 0.9;
+    double centerX = bounds->getCenterX();
+    double centerY = bounds->getCenterY();
 
-    for (VoroNode child : getChildren()) {
-        Point2D pos = child.getRelativeVector();
+    for (VoroNode* child : *children_) 
+    {
+        Point2D pos = child->getRelativeVector();
         pos.setLocation((pos.getX() - localCenterX) * scaleX,
                         (pos.getY() - localCenterY) * scaleY);
     }
 }
 
 
-void voronoi::VoroNode::increasePercentageDirectly() {
-    weight = weight * 1.5;
+void voronoi::VoroNode::increasePercentageDirectly() 
+{
+    weight_ *= 1.5;
     // site.percent=site.percent*1.5;
 }
 
-void voronoi::VoroNode::decreasePercentage() {
-    site.setPercentage(site.getPercentage() * 0.4);
+void voronoi::VoroNode::decreasePercentage() 
+{
+    site_->setPercentage(site_->getPercentage() * 0.4);
 }
 
-void voronoi::VoroNode::setHeight(int height) {
-    this.height = height;
+void voronoi::VoroNode::setHeight(int height) 
+{
+    height_ = height;
 }
 
-int voronoi::VoroNode::getHeight() {
-    return height;
+int voronoi::VoroNode::getHeight() 
+{
+    return height_;
 }
 
-void voronoi::VoroNode::setWeight(double weight) {
-    this.weight = weight;
+void voronoi::VoroNode::setWeight(double weight) 
+{
+    weight_ = weight;
 }
 
-double voronoi::VoroNode::getWeight() {
-    return weight;
+double voronoi::VoroNode::getWeight() 
+{
+    return weight_;
 }
 
-void voronoi::VoroNode::setSite(Site s) {
-    this.site = s;
+void voronoi::VoroNode::setSite(voronoi::Site* s) 
+{
+    site_ = s;
 }
 
-Site voronoi::VoroNode::getSite() {
-    return site;
+voronoi::Site* voronoi::VoroNode::getSite() 
+{
+    return site_;
 }
-void voronoi::VoroNode::setTreemap(VoronoiTreemap treemap) {
-    this.treemap = treemap;
-}
-
-VoronoiTreemap voronoi::VoroNode::getTreemap() {
-    return treemap;
+void voronoi::VoroNode::setTreemap(voronoi::VoronoiTreemap* treemap) 
+{
+    treemap_ = treemap;
 }
 
-void voronoi::VoroNode::setRelativeVector(Point2D relativeVector) {
-    this.relativeVector = relativeVector;
+voronoi::VoronoiTreemap* voronoi::VoroNode::getTreemap() 
+{
+    return treemap_;
 }
 
-Point2D voronoi::VoroNode::getRelativeVector() {
-    return relativeVector;
+void voronoi::VoroNode::setRelativeVector(voronoi::Point2D relativeVector) 
+{
+    relativeVector_ = relativeVector;
+}
+
+voronoi::Point2D voronoi::VoroNode::getRelativeVector() 
+{
+    return relativeVector_;
 }
 
 
-@Override
-void voronoi::VoroNode::doFinalWork() {
+//@Override
+void voronoi::VoroNode::doFinalWork() 
+{
     // TODO Auto-generated method stub
 
 }
 
-@Override
-void voronoi::VoroNode::setVoroPolygon(PolygonSimple polygon) {
-    this.polygon=polygon;
+//@Override
+void voronoi::VoroNode::setVoroPolygon(PolygonSimple* polygon) 
+{
+    polygon_=polygon;
 }
 
-int[] voronoi::VoroNode::getChildrenIDs(){
+/**
+ * Who use this member func should retrieve the memory
+ * that allocated for the returned int array
+ * @author Jianye Xia
+ */
+int voronoi::VoroNode::getChildrenIDs(int* idList)
+{
     int length;
-    if (children==null || (length=children.size())==0){
-        return null;
+    if (children_==NULL || (length=children_->size())==0)
+    {
+        return 0;
     }
-    int[] ids = new int[length];
+    if(idList) delete idList;
+    idList=new int[length];
     int i=0;
-    for (VoroNode node:children){
-        ids[i]=node.getNodeID();
+    for (VoroNode* node:*children_)
+    {
+        idList[i]=node->getNodeID();
         i++;
     }
-    return ids;
+    return length;
 }
 
-PolygonSimple[] voronoi::VoroNode::getChildrenPolygons(){
+int voronoi::VoroNode::getChildrenPolygons(voronoi::PolygonSimple* childrenPolygonList[])
+{
     int length;
-    if (children==null || (length=children.size())==0){
-        return null;
+    if (children_==NULL || (length=children_->size())==0)
+    {
+        return 0;
     }
-    PolygonSimple[] polygons=new PolygonSimple[length];
+    if(childrenPolygonList) delete childrenPolygonList;
+    childrenPolygonList=new PolygonSimple*[length];
     int i=0;
-    for (VoroNode node:children){
-        polygons[i]=node.getSite().getPolygon();
+    for (VoroNode* node: *children_)
+    {
+        childrenPolygonList[i]=node->getSite()->getPolygon();
         i++;
     }
-    return polygons;
+    return length;
 }
 
-void voronoi::VoroNode::setName(String name) {
-    this.name=name;
+void voronoi::VoroNode::setName(std::string name) 
+{
+    this->name=name;
 }
 
-std::string voronoi::VoroNode::getName() {
-    if(getParent()!=null && getParent().getChildren().size()==1){
-        return getParent().getName()+"."+this.name;
+std::string voronoi::VoroNode::getName() 
+{
+    if(parent_!=NULL && parent_->children_->size()==1)
+    {
+        return parent_->getName()+"."+name;
     }
-    return this.name;
+    return name;
 }
 
 //--------Private member funcs---------//
 void voronoi::VoroNode::setSettingsToCore()
 {
-    core.setLevel(height);
-    core.setSettings(treemap.coreSettings);
+    core_->setLevel(height_);
+    core_->setSettings(treemap_->coreSettings_);
 }

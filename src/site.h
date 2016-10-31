@@ -1,15 +1,17 @@
 #ifndef SITE_H
 #define SITE_H
-
+#include "asite.h"
+#include "vorocellobject.h"
 /**
  * Extended Version of a site, which has relative Positions
  * @author Arlind Nocaj
  *
  */
 namespace voronoi {
-class Site: public ASite
+class Site: public AbstractSite
 {
 public:
+    friend class VoroNode;
     /**
      * This attribute is used to mark the sites, which are only added to bound the Voronoi diagram.
      */
@@ -32,15 +34,16 @@ public:
     Site clone();
     Site cloneZeroWeight();
 
-    Object getData();
+    VoroCellObject* getData();
     const char* toString();
     void setAsDummy();
-    void setData(Object child);
+    void setData(VoroCellObject* child);
     void setLastIncrease(double increase);
-    void paintLastIncrease(Graphics2D g, double radSize);
+    //TODO:need to move to vtk
+    //void paintLastIncrease(Graphics2D g, double radSize);
     double getLastIncrease();
 private:
-    Object data_;
+    VoroCellObject* data_;
     double lastIncrease_;
     double deltaX_;
     double deltaY_;

@@ -1,35 +1,47 @@
-#include "powerdiagram.h"
-#include <climit>
+#include <limits>
 #include <cmath>
+#include "powerdiagram.h"
+#include "face.h"
+#include "convexhull.h"
 
 voronoi::PowerDiagram::PowerDiagram():
-   amountPolygons_(0),bb_(0),s1_(0),s2_(0),s3_(0),s4_(0),
+   amountPolygons_(0),bb_(),s1_(0),s2_(0),s3_(0),s4_(0),
    hull_(0),sites_(0),facets_(0),clipPoly_(0)
 {}
 
-voronoi::PowerDiagram::PowerDiagram(OpenList* sites, PolygonSimple* clipPoly):
-   amountPolygons_(0),bb_(0),s1_(0),s2_(0),s3_(0),s4_(0),
+voronoi::PowerDiagram::PowerDiagram(std::vector<voronoi::Site*>* sites, voronoi::PolygonSimple* clipPoly):
+   amountPolygons_(0),bb_(),s1_(0),s2_(0),s3_(0),s4_(0),
    hull_(0),sites_(sites),facets_(0),clipPoly_(clipPoly)
 {}
 
-void voronoi::PowerDiagram::setSites(OpenList* sites)
+//Do not need to consider sites_ and clipPoly_, as they are passed through
+//by setSites and setClipyPoly funciton
+voronoi::PowerDiagram::~PowerDiagram()
+{
+    if(s1_) delete s1_;
+    if(s2_) delete s2_;
+    if(s3_) delete s3_;
+    if(s4_) delete s4_;
+    if(hull_) delete hull_;
+}
+void voronoi::PowerDiagram::setSites(std::vector<voronoi::Site*>* sites)
 {
     sites_ = sites;
-    if(hull_) delete hull_;
+    if(hull_) delete hull_;//Retrieve memory
     hull_=NULL;
 }
 
-void voronoi::PowerDiagram::setClipPoly(PolygonSimple* polygon)
+void voronoi::PowerDiagram::setClipPoly(voronoi::PolygonSimple* polygon)
 {
     clipPoly_ = polygon;
-    bb_ = polygon->getBounds2D();
+    bb_ = *(polygon->getBounds2D());
     // create sites on a rectangle which is big enough to not create
     // bisectors which intersect the clippingPolygon
-    double minX = bb->getMinX();
-    double minY = bb->getMinY();
+    double minX = bb_.getX();
+    double minY = bb_.getY();
 
-    double width = bb->getWidth();
-    double height = bb->getHeight();
+    double width = bb_.getWidth();
+    double height = bb_.getHeight();
 
     s1_ = new Site(minX - width, minY - height);
     s2_ = new Site(minX + 2 * width, minY - height);
@@ -42,7 +54,7 @@ void voronoi::PowerDiagram::setClipPoly(PolygonSimple* polygon)
     s4_->setAsDummy();
 }
 
-PolygonSimple* voronoi::PowerDiagram::getClipPoly()
+voronoi::PolygonSimple* voronoi::PowerDiagram::getClipPoly()
 {
     return clipPoly_;
 }
@@ -51,8 +63,8 @@ void voronoi::PowerDiagram::computeDiagram()
 {
     if (sites_->size() > 0)
     {
-        sites_->permutate();
-        hull = new ConvexHull();
+        //sites_->permutate();
+        hull_ = new ConvexHull();
         int size = sites_->size();
         for (int z = 0; z < size; z++)
         {
@@ -77,7 +89,7 @@ void voronoi::PowerDiagram::computeDiagram()
 }
 
 //TODO: Need improve
-void voronoi::PowerDiagram::writeHullTestCodeOut(Site* s)
+void voronoi::PowerDiagram::writeHullTestCodeOut(voronoi::Site* s)
 {
    /*
     System.out.println("hull_->addPoint(" + s.x + "," + s.y + "," + s.z
@@ -95,7 +107,7 @@ int voronoi::PowerDiagram::getAmountPolygons()
     return amountPolygons_;
 }
 
-static void voronoi::PowerDiagram::initDebug()
+void voronoi::PowerDiagram::initDebug()
 {
     /*
     BufferedImage image = new BufferedImage(2000, 2000,
@@ -132,7 +144,7 @@ void voronoi::PowerDiagram::showDiagram()
     */
 }
 
-void voronoi::PowerDiagram::draw(Site s)
+void voronoi::PowerDiagram::draw(voronoi::Site s)
 {
     /*
     s.paint(graphics);
@@ -171,21 +183,21 @@ void voronoi::PowerDiagram::computeData()
                 if (!verticesVisited[destVertex->getIndex()])
                 {
                     verticesVisited[destVertex->getIndex()] = true;
-                    if (site->isDummy())
+                    if (site->isDummy)
                     {
                         continue;
                     }
                     // faces around the vertices which correspond to the
                     // polygon corner points
-                    ArrayList<Face*>* faces = getFacesOfDestVertex(edge);
+                    std::vector<Face*>* faces = getFacesOfDestVertex(edge);
                     PolygonSimple* poly = new PolygonSimple();
                     //ref http://en.cppreference.com/w/cpp/types/numeric_limits/quiet_NaN
                     //need climit header and cmath
-                    double lastX = std::numeric_limit<double>::quiet_NaN();
-                    double lastY = std::numeric_limit<double>::quiet_NaN();
+                    double lastX = std::numeric_limits<double>::quiet_NaN();
+                    double lastY = std::numeric_limits<double>::quiet_NaN();
                     double dx = 1;
                     double dy = 1;
-                    for (const auto& face : *faces)
+                    for (Face* face : *faces)
                     {
                         Point2D point = face->getDualPoint();
                         double x1 = point.getX();
@@ -208,8 +220,8 @@ void voronoi::PowerDiagram::computeData()
                             lastY = y1;
                         }
                     }
-                    site->nonClippedPolyon = poly;
-                    if (!site->isDummy())
+                    site->nonClippedPolygon = poly;
+                    if (!site->isDummy)
                     {
                         site->setPolygon(clipPoly_->convexClip(poly));
                     }
@@ -219,20 +231,20 @@ void voronoi::PowerDiagram::computeData()
     }
 }
 //TODO:need to take care of faces returned,which contains new applied memory
-ArrayList<Face*>* voronoi::PowerDiagram::getFacesOfDestVertex(HullEdge* edge)
+std::vector<voronoi::Face*>* voronoi::PowerDiagram::getFacesOfDestVertex(voronoi::HullEdge* edge)
 {
-    ArrayList<Face*>* faces = new ArrayList<Face*>();
+    std::vector<Face*>* faces = new std::vector<Face*>();
     HullEdge* previous = edge;
     Vertex* first = edge->getEnd();
 
-    Site* site = dynamics_cast<Site*>(first);
-    ArrayList<Site*>* neighbours = new ArrayList<Site*>();
+    Site* site = dynamic_cast<Site*>(first);
+    std::vector<Site*>* neighbours = new std::vector<Site*>();
     do
     {
         previous = previous->getTwin()->getPrev();
         // add neighbour to the neighbourlist
         Site* siteOrigin = dynamic_cast<Site*>(previous->getStart());
-        if (!siteOrigin->isDummy()) {
+        if (!siteOrigin->isDummy) {
             neighbours->push_back(siteOrigin);
         }
         Face* iFace = previous->getiFace();

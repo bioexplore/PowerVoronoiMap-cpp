@@ -1,5 +1,4 @@
-#include "asite.h"
-using namespace voronoi;
+#include "site.h"
 
 /**
 *
@@ -12,7 +11,7 @@ using namespace voronoi;
 /*
 * return the dual point of the plane which is projected, see Aurenhammer,1987, Power Diagrams
 */
-static double ASite::projectZ(double x,double y,double weight)
+double voronoi::AbstractSite::projectZ(double x,double y,double weight)
 {
     return x*x+y*y-weight;
 }
@@ -20,39 +19,42 @@ static double ASite::projectZ(double x,double y,double weight)
 /* (non-Javadoc)
 * @see j2d.iSite#getPolygon()
 */
-PolygonSimple ASite::getPolygon()
+voronoi::PolygonSimple* voronoi::AbstractSite::getPolygon()
 {
-    return polygon;
+    return polygon_;
 }
-
-const char* ASite::toString()
+//TODO:need modify
+const char* voronoi::AbstractSite::toString()
 {
-    return "("+ getX()+"\t,"+getY()+","+weight+","+percentage+")+z: "+z;
+    char* buf=0;
+    buf=new char[120];
+    std::sprintf(buf,"(%f,%f,%f)z:%f",x,y,weight_,z);
+    return buf;
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#setPolygon(j2d.NPoly)
 */
-void ASite::setPolygon(PolygonSimple poly)
+void voronoi::AbstractSite::setPolygon(voronoi::PolygonSimple* poly)
 {
-    polygon=poly;
+    polygon_=poly;
 }
 
 /* (non-Javadoc)
-* @see j2d.iSite#setNeighbours(java.util.ArrayList)
+* @see j2d.iSite#setNeighbours(java.util.std::vector)
 */
-void ASite::setNeighbours(ArrayList<Site> list)
+void voronoi::AbstractSite::setNeighbours(std::vector<voronoi::Site*>* list)
 {
-    this.setOldNeighbors(neighbours);
-    neighbours=list;
+    setOldNeighbors(neighbours_);
+    neighbours_=list;
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#getNeighbours()
 */
-ArrayList<Site> ASite::getNeighbours()
+std::vector<voronoi::Site*>* voronoi::AbstractSite::getNeighbours()
 {
-    return neighbours;
+    return neighbours_;
 }
 
 /**
@@ -60,11 +62,10 @@ ArrayList<Site> ASite::getNeighbours()
 * @param x x-coordinate
 * @param y y-coordinate
 */
-ASite::ASite(double x, double y)
-{
-    super(x,y,projectZ(x, y, nearlyZero));
-    this.weight=nearlyZero;
-}
+voronoi::AbstractSite::AbstractSite(double x, double y):
+    Vertex(x,y,projectZ(x,y,nearlyZero_)),weight_(nearlyZero_),percentage_(nearlyZero_),cellObject_(NULL),
+    neighbours_(NULL),oldNeighbours_(NULL),polygon_(NULL),nonClippedPolygon(NULL),preflowVector()
+{}
 
 /**
 *
@@ -72,129 +73,113 @@ ASite::ASite(double x, double y)
 * @param y y-coordinate
 * @param weight the weight of the site, where weight=radius*radius which is used for weighting
 */
-ASite::ASite(double x, double y, double weight)
-{
-    super(x,y,projectZ(x, y, weight));
-    this.weight=weight;
-}
+voronoi::AbstractSite::AbstractSite(double x, double y, double weight):
+    Vertex(x,y,projectZ(x,y,weight)),weight_(weight),percentage_(nearlyZero_),cellObject_(NULL),
+    neighbours_(NULL),oldNeighbours_(NULL),polygon_(NULL),nonClippedPolygon(NULL),preflowVector()
+{}
 
-ASite::ASite(double x, double y, double weight, double percentage){
-    super(x,y,projectZ(x, y, weight));
-    this.weight=weight;
-    this.percentage=percentage;
-
-}
+voronoi::AbstractSite::AbstractSite(double x, double y, double weight, double percentage):
+    Vertex(x,y,projectZ(x,y,weight)),weight_(weight),percentage_(percentage),cellObject_(NULL),
+    neighbours_(NULL),oldNeighbours_(NULL),polygon_(NULL),nonClippedPolygon(NULL),preflowVector()
+{}
 
 /* (non-Javadoc)
 * @see j2d.iSite#getWeight()
 */
-double ASite::getWeight()
+double voronoi::AbstractSite::getWeight()
 {
-    return weight;
+    return weight_;
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#setWeight(double)
 */
-void ASite::setWeight(double weight)
+void voronoi::AbstractSite::setWeight(double weight)
 {
-    this.weight=weight;
+    weight_=weight;
     project();
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#setXY(double, double)
 */
-void ASite::setXY(double x, double y)
+void voronoi::AbstractSite::setXY(double x, double y)
 {
-    this.x=x;
-    this.y=y;
+    this->x=x;
+    this->y=y;
     project();
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#setXYW(double, double, double)
 */
-void ASite::setXYW(double x,double y, double weight)
+void voronoi::AbstractSite::setXYW(double x,double y, double weight)
 {
-    this.x=x;
-    this.y=y;
-    this.weight=weight;
+    this->x=x;
+    this->y=y;
+    weight_=weight;
     z=projectZ(x, y, weight);
 }
-private void ASite::project()
+void voronoi::AbstractSite::project()
 {
-    z=projectZ(x, y, weight);
+    z=projectZ(x, y, weight_);
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#setX(double)
 */
-void ASite::setX(double x)
+void voronoi::AbstractSite::setX(double x)
 {
-    this.x = x;
+    this->x = x;
     project();
 }
 /* (non-Javadoc)
  * @see j2d.iSite#setY(double)
  */
-void ASite::setY(double y)
+void voronoi::AbstractSite::setY(double y)
 {
-    this.y = y;
+    this->y = y;
     project();
 }
 
 /**
 * The sites are first ordered according to the x-axis and then according to the y axis
 */
-@Override
-int ASite::compareTo(Site b)
+//@Override
+int voronoi::AbstractSite::compareTo(Site* b)
 {
-    if (this.x<b.x) return -1;
-    if (this.x>b.x) return 1;
-    if (this.x==b.x)
+    if (x<b->x) return -1;
+    if (x>b->x) return 1;
+    if (x==b->x)
     {
-        if (this.y<b.y) return -1;
-        if (this.y>b.y) return 1;
-        if (this.y==b.y)return 0;
+        if (y<b->y) return -1;
+        if (y>b->y) return 1;
+        if (y==b->y)return 0;
     }
     return 0;
 }
 
-void ASite::paint(Graphics2D g)
-{
-    int radius = (int)Math.sqrt(this.getWeight());
-    //	g.fillOval((int)this.getX()-radius, (int)this.getY()-radius, 2*radius, 2*radius);
-    g.setColor(Colors.circleBorder);
-    g.drawOval((int)this.getX()-radius, (int)this.getY()-radius, 2*radius, 2*radius);
-    g.setColor(Color.yellow);
-    int width=1;
-    g.fillRect((int)this.getX()-width, (int)this.getY()-width, 2*width,2*width );
-}
-
-
-
 /* (non-Javadoc)
 * @see j2d.iSite#setPercentage(double)
 */
-void ASite::setPercentage(double percentage)
+void voronoi::AbstractSite::setPercentage(double percentage)
 {
-    this.percentage = percentage;
+    percentage_ = percentage;
 }
 /* (non-Javadoc)
 * @see j2d.iSite#getPercentage()
 */
-double ASite::getPercentage()
+double voronoi::AbstractSite::getPercentage()
 {
-    return percentage;
+    return percentage_;
 }
 
 /* (non-Javadoc)
 * @see j2d.iSite#getPoint()
 */
-Point2D ASite::getPoint()
+voronoi::Point2D voronoi::AbstractSite::getPoint()
 {
-    return new Point2D(getX(),getY());
+    return Point2D(getX(),getY());
 }
 
 /**
@@ -202,30 +187,36 @@ Point2D ASite::getPoint()
 * @param point
 * @return
 */
-double ASite::distance(Site point)
+double voronoi::AbstractSite::distance(voronoi::Site* point)
 {
-    double dx = x-point.getX();
-    double dy = y-point.getY();
-    return Math.sqrt(dx*dx+dy*dy);
+    double dx = x-point->getX();
+    double dy = y-point->getY();
+    return std::sqrt(dx*dx+dy*dy);
 }
 
-double ASite::distanceCircles(Site point)
+//get cellobject
+voronoi::VoroCellObject* getCellObject()
 {
-    double dx = x-point.getX();
-    double dy = y-point.getY();
-    double radius1 = Math.sqrt(weight);
-    double radius2=Math.sqrt(point.weight);
-    return Math.sqrt(dx*dx+dy*dy)-radius1-radius2;
+    return cellObject_;
+}
+
+double voronoi::AbstractSite::distanceCircles(voronoi::Site* point)
+{
+    double dx = x-point->getX();
+    double dy = y-point->getY();
+    double radius1 = std::sqrt(weight_);
+    double radius2=std::sqrt(point->weight_);
+    return std::sqrt(dx*dx+dy*dy)-radius1-radius2;
 }
 
 
-ArrayList<Site> ASite::getOldNeighbors()
+std::vector<voronoi::Site*>* voronoi::AbstractSite::getOldNeighbours()
 {
-    return oldNeighbors;
+    return oldNeighbours_;
 }
 //TODO: should delete oldNeighbors originally occupied memory
-void ASite::setOldNeighbors(ArrayList<Site> oldNeighbors)
+void voronoi::AbstractSite::setOldNeighbors(std::vector<voronoi::Site*>* oldNeighbors)
 {
-    if(oldNeighbors) delete oldNeighbors;
-    this.oldNeighbors = oldNeighbors;
+    if(oldNeighbours_) delete oldNeighbours_;
+    oldNeighbours_ = oldNeighbors;
 }

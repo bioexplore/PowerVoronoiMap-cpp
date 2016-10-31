@@ -37,6 +37,7 @@ public:
     inline double   distance(Point2D p)         {return distance(p.x,p.y);}
     inline double   getX()                      {return x;}
     inline double   getY()                      {return y;}
+    inline bool     negative()                  {return x<0 ||y<0;}
     inline char*    toString()
     {
         char* buf=0;
@@ -45,12 +46,14 @@ public:
         return buf;
     }
     inline void     scale(double d)             { x*=d; y*=d; }
+    inline void     translate(double dx,double dy) {x+=dx;y+=dy;}
     /**
      * @brief dot computes dot-product of the given vector with position vector of the current point
      * @param p
      * @return dot-product
      */
     inline double   dot(Point2D* p)             {return x*(p->x)+y*(p->y);}
+    inline double   cross(Point2D* p)           {return x*(p->y)-y*(p->x);}
     inline double   length()                    {return std::sqrt(x*x+y*y);}
     inline double   lengthSquared()             { return x*x + y*y;}
     /**

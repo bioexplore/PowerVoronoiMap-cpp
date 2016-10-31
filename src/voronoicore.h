@@ -1,5 +1,10 @@
 #ifndef VORONOICORE_H
 #define VORONOICORE_H
+#include <vector>
+#include "rectangle2d.h"
+#include "polygonsimple.h"
+#include "vorosettings.h"
+#include "powerdiagram.h"
 
 namespace voronoi {
 /**
@@ -8,21 +13,17 @@ namespace voronoi {
  *
  * @author Arlind Nocaj
  */
+
 class VoronoiCore
 {
 public:
-    // TODO remove when finished
-    static bool debugMode;// = false;
-    static ImageFrame frame;
-    static Graphics2D graphics;
-
-
     VoronoiCore();
-    VoronoiCore(Rectangle2D rectangle);
-    VoronoiCore(PolygonSimple clipPolygon);
-    VoronoiCore(OpenList sites, PolygonSimple clipPolygon);
-    OpenList getSiteList();
-    static void setDebugMode();
+    VoronoiCore(Rectangle2D& rectangle);
+    VoronoiCore(PolygonSimple* clipPolygon);
+    VoronoiCore(std::vector<Site*>* sites, PolygonSimple* clipPolygon);
+    ~VoronoiCore();
+
+    std::vector<Site*>* getSiteList();
 
     /**
      * The resulting Voronoi cells are clipped with this polygon
@@ -30,106 +31,110 @@ public:
      * @param polygon
      *            clipping polygon
      */
-    void setClipPolygon(PolygonSimple polygon);
+    void setClipPolygon(PolygonSimple* polygon);
     /**
      * Returns clipping polygon
      *
      * @return
      */
-    PolygonSimple getClipPolyogon();
+    PolygonSimple* getClipPolyogon();
     /**
      * Sets a rectangle as clipping polygon.
      *
      * @param rectangle
      */
-    void setClipPolygon(Rectangle2D rectangle);
+    void setClipPolygon(Rectangle2D& rectangle);
     /**
      * Adds a site to the Voronoi diagram.
      *
      * @param site
      */
-    void addSite(Site site);
+    void addSite(Site* site);
     void iterateSimple();
-    bool checkBadResult(OpenList sites);
+    bool checkBadResult(std::vector<Site*>* sites);
     /**
      * Computes the diagram and sets the results
      */
     //synchronized 
     void voroDiagram();
     void printCoreCode();
-    static void printPolygonCode(PolygonSimple poly);
+    static void printPolygonCode(PolygonSimple* poly);
     void doIterate();
     /**
      * For debugging only
      *
      * @param isLast
      */
-    void drawCurrentState(bool isLast);
-    Color getFillColorScaled(Site s);
+    //void drawCurrentState(bool isLast);
+    //Color getFillColorScaled(Site s);
     //synchronized 
-    void drawState(Graphics2D g, bool isLast);
-    void setSites(OpenList sites);
-    OpenList getSites();
-    static void main(String[] args);
-    static void normalizeSites(OpenList sites);
+    //void drawState(Graphics2D g, bool isLast);
+    void setSites(std::vector<Site*>* sites);
+    std::vector<Site*>* getSites();
+    static void normalizeSites(std::vector<Site*>* sites);
     void setLevel(int height);
-    void setSettings(VoroSettings coreSettings);
+    void setSettings(VoroSettings* coreSettings);
 protected:
-    PolygonSimple clipPolygon;
-    OpenList sites;
-    PowerDiagram diagram;
-    double currentAreaError = 1.0;
+    PolygonSimple* clipPolygon_;
+    std::vector<Site*>* sites_;
+    PowerDiagram* diagram_;
+    double currentAreaError_;// = 1.0;
     /**
      * Computes the ordinary diagram and sets the results
      */
     //synchronized 
-    void voroOrdinaryDiagram(OpenList sites);
+    void voroOrdinaryDiagram(std::vector<Site*>* sites);
 private:
+    constexpr static double nearlyOne_ = 0.999;
     // private SVGGraphics2D svgGraphics;
-    static Random rand = new Random(99);
+    //static Random rand = new Random(99);
     /** If this mode is true, svg files are created in each iteration **/
-    bool outPutMode;
+    bool outputMode_;
     /** Counter for creating the output files. **/
-    int outCounter = 1;
+    int outCounter_;// = 1;
+
+    /** If true, means this obj's clipPoly is construced by Rectangle2D
+     * and memories of clipPolygon_ should be retrieved when destruction
+     */
+    bool rectanglePoly_;
 
     /**
      * core variables
      */
-    bool firstIteration = true;
-    static final double nearlyOne = 0.999;
+    bool firstIteration_;// = true;
 
     /**
      * Settings for the Core
      */
-    VoroSettings settings = new VoroSettings();
+    VoroSettings* settings_;// = new VoroSettings();
 
-    int currentIteration;
+    int currentIteration_;
     // level in the hierarchy, level=0 is the first layer
-    int level;
-    Point2D center;
-    double scale;
-    AffineTransform transform;
-    double currentErrorMax;
+    int level_;
+    Point2D center_;
+    double scale_;
+    //AffineTransform transform;
+    double currentErrorMax_;
 
     void init();
-    void randomizePoints(OpenList sites);
+    void randomizePoints(std::vector<Site*>* sites);
     void fixNoPolygonSites();
-    void checkPointsInPolygon(OpenList sites);
-    double computeAreaError(OpenList sites);
-    double computeMaxError(OpenList sites2);
-    void moveSites(OpenList sites);
-    void adjustWeightsToBePositive(OpenList sites);
-    void adaptWeightsSimple(OpenList sites);
-    void fixWeightsIfDominated(OpenList sites);
-    void fixWeightsIfDominated2(OpenList sites);
+    void checkPointsInPolygon(std::vector<Site*>* sites);
+    double computeAreaError(std::vector<Site*>* sites);
+    double computeMaxError(std::vector<Site*>* sites2);
+    void moveSites(std::vector<Site*>* sites);
+    void adjustWeightsToBePositive(std::vector<Site*>* sites);
+    void adaptWeightsSimple(std::vector<Site*>* sites);
+    void fixWeightsIfDominated(std::vector<Site*>* sites);
+    void fixWeightsIfDominated2(std::vector<Site*>* sites);
     /**
      * Computes the minimal distance to the voronoi Diagram neighbours
      */
-    double getMinNeighbourDistance(Site point);
-    double getAvgNeighbourDistance(Site point);
-    double getAvgWeight(OpenList sites);
-    double getGlobalAvgNeighbourDistance(OpenList sites);
-    double getMinNeighbourDistanceOld(Site point);
+    double getMinNeighbourDistance(Site* point);
+    double getAvgNeighbourDistance(Site* point);
+    double getAvgWeight(std::vector<Site*>* sites);
+    double getGlobalAvgNeighbourDistance(std::vector<Site*>* sites);
+    double getMinNeighbourDistanceOld(Site* point);
     /**
      * Scaling and Shifting allows for higher geometry precision
      */

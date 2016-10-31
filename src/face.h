@@ -47,7 +47,7 @@ class Face{
         HullEdge*       getHorizon();
         
     private:
-        const static double epsilon_=1e-10;
+        constexpr static double epsilon_=1e-10;
 
         ConflictList*   list_;
         bool            marked_;

@@ -17,7 +17,7 @@ public:
     Point2D* originalObject; //TODO:consider change to originalPoint
 
     Vertex(double a,double b,double c);
-    ~Vertex();
+    virtual ~Vertex();
 
      ConflictList*        getList();
      void                 setList(ConflictList* list);
@@ -49,7 +49,7 @@ public:
      void             clear();
 
 private:
-    const static double epsilon = 1e-10;
+    constexpr static double epsilon = 1e-10;
     ConflictList*   list_;
     int             index_;
     bool            handled_;

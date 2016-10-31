@@ -66,11 +66,11 @@ void HullEdge::setPrev(HullEdge* prevEdge)
     prev_=prevEdge;
 }
 
- Vertex* HullEdge::getStartPtr()
+ Vertex* HullEdge::getStart()
 {
     return start_;
 }
- Vertex* HullEdge::getEndPtr()
+ Vertex* HullEdge::getEnd()
 {
     return end_;
 }

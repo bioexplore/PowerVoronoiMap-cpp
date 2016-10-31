@@ -84,7 +84,7 @@ std::vector<Face*>* ConvexHull::compute()
         for(int i=0;i < horizon_->size();i++)
         {
             HullEdge* tmpEdge=horizon_->operator[](i);
-            Face* fn=new Face(nextP,tmpEdge->getStartPtr(),tmpEdge->getEndPtr(),tmpEdge->getTwin()->getNext()->getEndPtr());
+            Face* fn=new Face(nextP,tmpEdge->getStart(),tmpEdge->getEnd(),tmpEdge->getTwin()->getNext()->getEnd());
             fn->setList(new ConflictList(true));
 
             //Add to facet list
@@ -99,16 +99,16 @@ std::vector<Face*>* ConvexHull::compute()
             //fn->link(tmpEdge->getTwin());//After this original link between the two old faces will be broken
                                         //modified by Jianye Xia @20161022
             if(last!=NULL)
-                fn->link(last,nextP,tmpEdge->getStartPtr());//original code
-                //fn->link(last,nextP,tmpEdge->getEndPtr());//modified by Jianye Xia @20161022
+                fn->link(last,nextP,tmpEdge->getStart());//original code
+                //fn->link(last,nextP,tmpEdge->getEnd());//modified by Jianye Xia @20161022
             last=fn;//Save the new created face to last for next loop useage
             if(first == NULL)
                 first = fn;
         }
         //Links the first and the last created Face
         if(first!=NULL && last!=NULL)
-            last->link(first,nextP,horizon_->at(0)->getStartPtr());//original code
-            //last->link(first,nextP,horizon_->at(0)->getEndPtr());//modified by Jianye Xia @20161022
+            last->link(first,nextP,horizon_->at(0)->getStart());//original code
+            //last->link(first,nextP,horizon_->at(0)->getEnd());//modified by Jianye Xia @20161022
         if(created_->size()!=0)
         {
             //Update conflict graph
