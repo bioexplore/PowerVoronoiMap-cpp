@@ -9,7 +9,6 @@
 #include "statusobject.h"
 
 namespace voronoi {
-typedef std::unordered_map<int,VoroNode*> HashMap;
 class Tuple3ID;
 class VoronoiTreemap
 {
@@ -29,7 +28,7 @@ public:
     VoronoiTreemap(StatusObject* statusObject);
 
     /** when a node is finished the status object is notified. **/
-    HashMap* getIdToNode();
+    std::unordered_map<int,VoroNode*>* getIdToNode();
     void compute();
     void computeLocked();
     void setReferenceMap(std::vector<Tuple3ID*>* relativePositions);
@@ -86,7 +85,7 @@ protected:
     void initVoroNodes();
     void setSettingsToVoroNode(VoroNode* node);
     //final
-    void addChildren(HashMap* idToNode,std::vector<std::vector<int> >& adjLists, int currentPos);
+    void addChildren(std::unordered_map<int,VoroNode*>* idToNode,std::vector<std::vector<int> >& adjLists, int currentPos);
     void setAmountNodes(int amountNodes);
     int getAmountNodes();
     //void drawTreemapWithComponents(Graphics2D g);
@@ -119,7 +118,7 @@ private:
     std::vector<VoroNode*>*                 cellQueue_;
     std::vector<StatusObject*>*             statusObjects_;
     PolygonSimple*                          rootPolygon_;
-    HashMap*                                idToNode_;
+    std::unordered_map<int,VoroNode*>*      idToNode_;
     std::vector<Tuple3ID*>*                 relativePositions_;
     VoroSettings*                           coreSettings_;// = new VoroSettings();
     int*                                    levelsMaxIteration_;

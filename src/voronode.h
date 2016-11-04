@@ -2,11 +2,6 @@
 #define VORONODE_H
 #include <string>
 #include <vector>
-#include "vorocellobject.h"
-#include "polygonsimple.h"
-#include "site.h"
-#include "voronoicore.h"
-#include "point2d.h"
 
 namespace voronoi {
 /**
@@ -15,81 +10,83 @@ namespace voronoi {
  * @author Arlind Nocaj
  *
  */
-    class VoroNode;
-typedef std::vector<VoroNode*> ChildList;
-    class VoronoiTreemap;
+class VoroCellObject;
+class PolygonSimple;
+class Site;
+class VoronoiCore;
+class Point2D;
+class VoroNode;
+class VoronoiTreemap;
 class VoroNode:public VoroCellObject //implements VoroCellObject
 {
 private:
-    //pointers to higher levels of the hierarchy
-    /**
-     * tree information
-     */
-    VoronoiTreemap* treemap_;
-    VoroNode* parent_;
-    ChildList* children_;
+    std::vector<VoroNode*>*     children_; //A vector that contains all included children nodes. A pointer with allocated memory        [Retrieve]
+    VoroNode*                   parent_;   //A pointer point to this node's parent.A pointer reference.                                 [No Retrieve]
+    VoronoiTreemap*             treemap_;  //A pointer point to the treemap that manage this node. A pointer reference.                 [No Retrieve]
+    PolygonSimple*              polygon_;  //A pointer point to the node's corresponding polygon. A pointer reference.                  [No Retrieve] ??
+    VoronoiCore*                core_;     //A pointer that contains allocated voronoicore object. A pointer with allocated memory      [Retrieve] 
+    Site*                       site_;     //A pointer that contains allocated site object. A pointer with allocated memory             [Retrieve]
+    Point2D*                    relativeVector_; //A pointer that contains a llocated point2d object. A pointer with allocated memory.  [Retrieve]
 
-    int nodeID_;
-    int height_;//=0;
-    PolygonSimple* polygon_;
-    bool toConsider_;// = true;
+    int                         nodeID_;            // Id for the node
+    int                         height_;            // Node level in the tree structure
+    bool                        toConsider_;        // Whether to compute this node
+    double                      wantedPercentage_;  // Parameter used to update node
+    double                      weight_;            // The weight for the node
 
-    double weight_;//=1;
-    VoronoiCore* core_;
-    Site* site_;
-    double wantedPercentage_;//=0;
-    Point2D relativeVector_;
     void setSettingsToCore();
-
 public:
     std::string name;
 
     VoroNode(int nodeID);
     VoroNode(int nodeID, int numberChildren);
     ~VoroNode();
-    void calculateWeights();
-    void setSpiralRelativeCoordinates();
-    void setNodeID(int nodeID);
-    int getNodeID();
-    void setParent(VoroNode* parent);
-    VoroNode* getParent();
-    void setChildren(std::vector<VoroNode*>* children);
-    std::vector<VoroNode*>* getChildren();
-    void setPolygon(PolygonSimple* polygon);
-    PolygonSimple* getPolygon();
-    void setToConsider(bool toConsider);
-    bool isToConsider();
-    void setWantedPercentage(double percentage);
-    double getWantedPercentage();
-    void addChild(VoroNode* child);
-    void iterate();
+
+    void            addChild(VoroNode* child);
+    void            calculateWeights();
+    void            decreasePercentage();
+    int             getNodeID();
+    VoroNode*       getParent();
+    std::vector<VoroNode*>*     getChildren();
+    PolygonSimple*  getPolygon();
+    bool            isToConsider();
+    double          getWantedPercentage();
+    void            iterate();
     /**
      * Scales the relative vectors of the child nodes to the size of our current
      * polygon. Doing this helps to preserve the mental map.
      */
-    void scaleRelativeVectors();
+    void            scaleRelativeVectors();
 
-    void increasePercentageDirectly();
-    void decreasePercentage();
-    void setHeight(int height);
-    int getHeight();
-    void setWeight(double weight);
-    double getWeight();
-    void setSite(Site* s);
-    Site* getSite();
-    void setTreemap(VoronoiTreemap* treemap);
+    void            setChildren(std::vector<VoroNode*>* children);
+    void            setHeight(int height);
+    void            setWeight(double weight);
+    void            setName(std::string name);
+    void            setNodeID(int nodeID);
+    void            setParent(VoroNode* parent);
+    void            setPolygon(PolygonSimple* polygon);
+    void            setRelativeVector(Point2D* relativeVector);
+    void            setRelativeVector(Point2D relativeVector);
+    void            setSite(Site* s);
+    void            setSpiralRelativeCoordinates();
+    void            setToConsider(bool toConsider);
+    void            setTreemap(VoronoiTreemap* treemap);
+    void            setWantedPercentage(double percentage);
+
+    void            increasePercentageDirectly();
+    int             getChildrenIDs(int* list);
+    int             getChildrenPolygons(PolygonSimple**);
+    int             getHeight();
+    std::string     getName();
+    double          getWeight();
+    Site*           getSite();
     VoronoiTreemap* getTreemap();
-    void setRelativeVector(Point2D relativeVector);
-    Point2D getRelativeVector();
+    Point2D*        getRelativeVector();
 
-    //@Override
-    void doFinalWork();
-    //@Override
-    void setVoroPolygon(PolygonSimple* polygon);
-    int  getChildrenIDs(int* list);
-    int  getChildrenPolygons(PolygonSimple** );
-    void setName(std::string name);
-    std::string getName();
+    // Virtual memeber functions impelement
+    void            doFinalWork();
+    void            setVoroPolygon(PolygonSimple* polygon);
+
 };
 
 }

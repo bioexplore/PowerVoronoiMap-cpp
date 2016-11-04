@@ -1,18 +1,22 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include "vorocellobject.h"
 #include "voronode.h"
+#include "voronoicore.h"
+#include "site.h"
+#include "polygonsimple.h"
 #include "treemap.h"
 
 voronoi::VoroNode::VoroNode(int nodeID):
     children_(NULL),core_(NULL),height_(0),name(""),nodeID_(nodeID),parent_(NULL),
-    polygon_(NULL),relativeVector_(-1,-1),site_(NULL),toConsider_(false),treemap_(NULL),
+    polygon_(NULL),relativeVector_(NULL),site_(NULL),toConsider_(false),treemap_(NULL),
     wantedPercentage_(0),weight_(0)
 {}
 
 voronoi::VoroNode::VoroNode(int nodeID, int numberChildren):
     children_(NULL),core_(NULL),height_(0),name(""),nodeID_(nodeID),parent_(NULL),
-    polygon_(NULL),relativeVector_(-1,-1),site_(NULL),toConsider_(false),treemap_(NULL),
+    polygon_(NULL),relativeVector_(NULL),site_(NULL),toConsider_(false),treemap_(NULL),
     wantedPercentage_(0),weight_(0)
 {
     children_=new std::vector<VoroNode*>(numberChildren);
@@ -20,8 +24,18 @@ voronoi::VoroNode::VoroNode(int nodeID, int numberChildren):
 
 voronoi::VoroNode::~VoroNode()
 {
-    if(children_) delete children_;
-    children_=NULL;
+    if(children_)       
+        delete children_;
+    if(core_) 
+        delete core_;
+    if(site_) 
+        delete site_;
+    if(relativeVector_) 
+        delete relativeVector_;
+    children_   =       NULL;
+    core_       =       NULL;
+    site_       =       NULL;
+    relativeVector_ =   NULL;
 }
 
 void voronoi::VoroNode::calculateWeights() 
@@ -49,45 +63,13 @@ void voronoi::VoroNode::calculateWeights()
     weight_ = sum;
 }
 
-//TODO:need to redefine
+//TODO:need to redefine,not finished
 void voronoi::VoroNode::setSpiralRelativeCoordinates()
 {
     if (children_ == NULL || children_->size() == 0) 
     {
         return;
     }
-    /*
-    std::vector<VoroNode*>* nodes=children_;
-    Collections.sort(nodes,new Comparator<VoroNode>()
-    {
-         //@Override
-         int compare(VoroNode o1, VoroNode o2)
-         {
-             // TODO Auto-generated method stub
-             return -Double.compare(o1.getWantedPercentage(),o2.getWantedPercentage());
-         }
-
-    });
-
-    int i=0;
-    Random rand=new Random();
-    for (VoroNode voroNode : nodes) 
-    {
-        double angle=Math.PI*2.0*(i*1.0/nodes.size());
-        double b=1;
-        double a=1;
-        //			double radius=b*Math.exp(a*angle);
-        double radius=1-i*1.0/nodes.size()+(rand.nextFloat()-0.5)*0.2;
-        double x =Math.cos(angle);
-        double y =Math.sin(angle);
-        x*=radius;
-        y*=radius;
-        voroNode.setRelativeVector(new Point2D(x, y));
-        i++;
-    }
-    for (VoroNode child : children_)
-        child.setSpiralRelativeCoordinates();
-    */
 }
 
 void voronoi::VoroNode::setNodeID(int nodeID) 
@@ -110,9 +92,15 @@ voronoi::VoroNode* voronoi::VoroNode::getParent()
     return parent_;
 }
 
-void voronoi::VoroNode::setChildren(std::vector<voronoi::VoroNode*>* children_) 
+void voronoi::VoroNode::setChildren(std::vector<voronoi::VoroNode*>* children) 
 {
-    children_ = children_;
+    if(children_) 
+    {
+        for(VoroNode* child:*children_)
+            if(child) delete child;
+        delete children_;
+    }
+    children_ = children;
 }
 
 std::vector<voronoi::VoroNode*>* voronoi::VoroNode::getChildren() 
@@ -122,6 +110,7 @@ std::vector<voronoi::VoroNode*>* voronoi::VoroNode::getChildren()
 
 void voronoi::VoroNode::setPolygon(voronoi::PolygonSimple* polygon) 
 {
+    if(polygon_) delete polygon_;
     polygon_ = polygon;
 }
 
@@ -180,7 +169,7 @@ void voronoi::VoroNode::iterate()
         // add each children_ as a site
         for (VoroNode* child : *children_)
         {
-            Point2D p = polygon_->getRelativePosition(child->relativeVector_);
+            Point2D p = polygon_->getRelativePosition(*(child->relativeVector_));
             Site* s = new Site(p.getX(), p.getY());
             s->setPercentage(child->wantedPercentage_);
             s->setData(child);
@@ -200,9 +189,9 @@ void voronoi::VoroNode::iterate()
             {
                 //FIXME: need to fix
                 Point2D pos;
-                if (child->relativeVector_.x !=-1 && child->relativeVector_.y !=-1 ) 
+                if (child->relativeVector_->x !=-1 && child->relativeVector_->y !=-1 ) 
                 {
-                    pos = polygon_->getRelativePosition(child->relativeVector_);
+                    pos = polygon_->getRelativePosition(*(child->relativeVector_));
                 } else 
                 {
                     pos = polygon_->getInnerPoint();
@@ -257,29 +246,30 @@ void voronoi::VoroNode::scaleRelativeVectors()
     double localCenterY = 0;
     for (VoroNode* child : *children_) 
     {
-        Point2D pos = child->getRelativeVector();
-        // TODO:negative means outsiede polygon
-        if (pos.negative()) 
+        Point2D* pos = (child->getRelativeVector());
+        if (pos==NULL) 
         {
-            pos=polygon_->getInnerPoint();
+            Point2D p=polygon_->getInnerPoint();
+            pos=new Point2D(p.x,p.y);
+            child->setRelativeVector(pos);
         }
-        localCenterX += pos.getX();
-        localCenterY += pos.getY();
-        if (pos.getX() < minX) 
+        localCenterX += pos->getX();
+        localCenterY += pos->getY();
+        if (pos->getX() < minX) 
         {
-            minX = pos.getX();
+            minX = pos->getX();
         }
-        if (pos.getX() > maxX) 
+        if (pos->getX() > maxX) 
         {
-            maxX = pos.getX();
+            maxX = pos->getX();
         }
-        if (pos.getY() < minY) 
+        if (pos->getY() < minY) 
         {
-            minY = pos.getY();
+            minY = pos->getY();
         }
-        if (pos.getY() > maxY) 
+        if (pos->getY() > maxY) 
         {
-            maxY = pos.getY();
+            maxY = pos->getY();
         }
     }
     localCenterX = localCenterX / children_->size();
@@ -292,7 +282,7 @@ void voronoi::VoroNode::scaleRelativeVectors()
 
     for (VoroNode* child : *children_) 
     {
-        Point2D pos = child->getRelativeVector();
+        Point2D pos = *(child->getRelativeVector());
         pos.setLocation((pos.getX() - localCenterX) * scaleX,
                         (pos.getY() - localCenterY) * scaleY);
     }
@@ -332,6 +322,7 @@ double voronoi::VoroNode::getWeight()
 
 void voronoi::VoroNode::setSite(voronoi::Site* s) 
 {
+    if(site_) delete site_;
     site_ = s;
 }
 
@@ -341,6 +332,7 @@ voronoi::Site* voronoi::VoroNode::getSite()
 }
 void voronoi::VoroNode::setTreemap(voronoi::VoronoiTreemap* treemap) 
 {
+    if(treemap_) delete treemap_;
     treemap_ = treemap;
 }
 
@@ -349,33 +341,45 @@ voronoi::VoronoiTreemap* voronoi::VoroNode::getTreemap()
     return treemap_;
 }
 
-void voronoi::VoroNode::setRelativeVector(voronoi::Point2D relativeVector) 
+void voronoi::VoroNode::setRelativeVector(voronoi::Point2D* relativeVector) 
 {
+    if(relativeVector_) delete relativeVector_;
     relativeVector_ = relativeVector;
 }
 
-voronoi::Point2D voronoi::VoroNode::getRelativeVector() 
+voronoi::Point2D* voronoi::VoroNode::getRelativeVector() 
 {
     return relativeVector_;
 }
 
+void voronoi::VoroNode::setRelativeVector(voronoi::Point2D relativeVector) 
+{
+    Point2D* p=new Point2D(relativeVector.x,relativeVector.y);
+    if(p!=NULL)
+    {
+        if(relativeVector_) delete relativeVector_;
+        relativeVector_=p;
+    }
+}
 
-//@Override
 void voronoi::VoroNode::doFinalWork() 
 {
     // TODO Auto-generated method stub
 
 }
 
-//@Override
 void voronoi::VoroNode::setVoroPolygon(PolygonSimple* polygon) 
 {
     polygon_=polygon;
 }
 
 /**
- * Who use this member func should retrieve the memory
- * that allocated for the returned int array
+ * Function used to get all children's id
+ * Input/Output: idList a null int pointer when passed as parameter, and filled with children's id after function return 
+ * Output: function will return 0 if no child is found for this node
+ *         will return the length of the array returned by idList
+ * Note:Who use this member func should retrieve the memory
+ *      that allocated for the returned int array
  * @author Jianye Xia
  */
 int voronoi::VoroNode::getChildrenIDs(int* idList)
@@ -396,6 +400,24 @@ int voronoi::VoroNode::getChildrenIDs(int* idList)
     return length;
 }
 
+/**
+ * Function will accept a null PolygonSimple's pointer's pointer, and fill it with all
+ * children's associated polygon, and return the number of element contained in it
+ * Input/Output: childrenPolygonList 
+ * Output: return 0 if no child is found
+ *         or number that states the element numbers contained in childrenPolygonList
+ * Note: who use this function should take care of the memory that allocated for the 
+ *      filled PolygonSimple's pointer array. the following is an example shows how 
+ *      to use it.
+ * Example usage:
+ *      voronoi::PolygonSimple ** p;
+ *      int size=0;
+ *      size = node->getChildrenPolygons(p);
+ *      ....
+ *      if(p)
+ *          delete p;
+ * @author: Jianye Xia
+ */ 
 int voronoi::VoroNode::getChildrenPolygons(voronoi::PolygonSimple* childrenPolygonList[])
 {
     int length;

@@ -483,29 +483,36 @@ Graphics2D voronoi::VoronoiTreemap::getGraphics()
 }*/
 
 //===========PRIVATE MEMBER FUNCS============//
-void startComputeThreads()
+void voronoi::VoronoiTreemap::startComputeThreads()
 {
-    runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
-    for (int i = 0; i < getNumberThreads(); i++)
-        new VoroCPU(cellQueue, this, runningThreads).start();
+    //runningThreads = Collections.newSetFromMap(new Concurrentstd::unordered_map<VoroCPU, bool>());
+    //for (int i = 0; i < getNumberThreads(); i++)
+        //new VoroCPU(cellQueue, this, runningThreads).start();
+   if(cellQueue_->size()==0) return;
+   while(true)
+   {
+       VoroNode* node=cellQueue_->at(0);
+       node->iterate();
+   }
+   
 }
 
-void setRelativePositions(std::vector<voronoi::Tuple3ID*>* relativePositions)
+void voronoi::VoronoiTreemap::setRelativePositions(std::vector<voronoi::Tuple3ID*>* relativePositions)
 {
-    if (relativePositions_ == NULL)
+    if (relativePositions == NULL)
     {
-        for (auto& voroNodePair : *idToNode_)
+        for (const auto& voroNodePair : *idToNode_)
         {
             double x = ((double)std::rand()/RAND_MAX);
             double y = ((double)std::rand()/RAND_MAX);
-            VoroNode* voroNode=voroNodePair->second;
+            VoroNode* voroNode=voroNodePair.second;
             voroNode->setRelativeVector(Point2D(x, y));
         }
         return;
     }
     setReferenceMap(relativePositions);
 }
-void setShowLeafs(bool showLeafs)
+void voronoi::VoronoiTreemap::setShowLeafs(bool showLeafs)
 {
     showLeafs_ = showLeafs;
 }
