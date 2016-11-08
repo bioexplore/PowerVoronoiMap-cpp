@@ -5,14 +5,15 @@
 #include "convexhull.h"
 
 voronoi::PowerDiagram::PowerDiagram():
-   amountPolygons_(0),bb_(),s1_(0),s2_(0),s3_(0),s4_(0),
-   hull_(0),sites_(0),facets_(0),clipPoly_(0)
+   amountPolygons_(0),bb_(),s1_(NULL),s2_(NULL),s3_(NULL),s4_(NULL),
+   hull_(NULL),sites_(NULL),facets_(NULL),clipPoly_(NULL)
 {}
 
 voronoi::PowerDiagram::PowerDiagram(std::vector<voronoi::Site*>* sites, voronoi::PolygonSimple* clipPoly):
-   amountPolygons_(0),bb_(),s1_(0),s2_(0),s3_(0),s4_(0),
-   hull_(0),sites_(sites),facets_(0),clipPoly_(clipPoly)
-{}
+   amountPolygons_(0),bb_(),s1_(NULL),s2_(NULL),s3_(NULL),s4_(NULL),
+   hull_(NULL),sites_(sites),facets_(NULL),clipPoly_(clipPoly)
+{
+}
 
 //Do not need to consider sites_ and clipPoly_, as they are passed through
 //by setSites and setClipyPoly funciton
@@ -42,6 +43,11 @@ void voronoi::PowerDiagram::setClipPoly(voronoi::PolygonSimple* polygon)
 
     double width = bb_.getWidth();
     double height = bb_.getHeight();
+
+    if(s1_) delete s1_;
+    if(s2_) delete s2_;
+    if(s3_) delete s3_;
+    if(s4_) delete s4_;
 
     s1_ = new Site(minX - width, minY - height);
     s2_ = new Site(minX + 2 * width, minY - height);
@@ -179,7 +185,7 @@ void voronoi::PowerDiagram::computeData()
                 // going through the double connected edge list
                 HullEdge* edge = facet->getEdge(e);
                 Vertex* destVertex = edge->getEnd();
-                Site* site = dynamic_cast<Site*>(destVertex);
+                Site* site = (Site*)(destVertex);
                 if (!verticesVisited[destVertex->getIndex()])
                 {
                     verticesVisited[destVertex->getIndex()] = true;
@@ -220,11 +226,13 @@ void voronoi::PowerDiagram::computeData()
                             lastY = y1;
                         }
                     }
+                    if(site->nonClippedPolygon) delete site->nonClippedPolygon;
                     site->nonClippedPolygon = poly;
                     if (!site->isDummy)
                     {
                         site->setPolygon(clipPoly_->convexClip(poly));
                     }
+                    if(faces) delete faces;
                 }
             }
         }
@@ -237,13 +245,13 @@ std::vector<voronoi::Face*>* voronoi::PowerDiagram::getFacesOfDestVertex(voronoi
     HullEdge* previous = edge;
     Vertex* first = edge->getEnd();
 
-    Site* site = dynamic_cast<Site*>(first);
+    Site* site = (Site*)(first);
     std::vector<Site*>* neighbours = new std::vector<Site*>();
     do
     {
         previous = previous->getTwin()->getPrev();
         // add neighbour to the neighbourlist
-        Site* siteOrigin = dynamic_cast<Site*>(previous->getStart());
+        Site* siteOrigin = (Site*)(previous->getStart());
         if (!siteOrigin->isDummy) {
             neighbours->push_back(siteOrigin);
         }

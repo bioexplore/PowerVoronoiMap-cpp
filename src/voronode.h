@@ -2,7 +2,7 @@
 #define VORONODE_H
 #include <string>
 #include <vector>
-
+#include "vorocellobject.h"
 namespace voronoi {
 /**
  * Represents a node in the Voronoi Treemap hierarchy. This node is put into the computation queue.
@@ -10,7 +10,6 @@ namespace voronoi {
  * @author Arlind Nocaj
  *
  */
-class VoroCellObject;
 class PolygonSimple;
 class Site;
 class VoronoiCore;

@@ -17,7 +17,7 @@ public:
     double y;
 
     Point2D():x(0),y(0){}
-    Point2D(double a,double b):x(b),y(b){}
+    Point2D(double a,double b):x(a),y(b){}
     /**
      * @brief distance Computes the euclidean distance between (x1,y1) and (x2,y2)
      * @param x1

@@ -1,3 +1,5 @@
+#include <string>
+#include <sstream>
 #include "infopoint.h"
 #include "point2d.h"
 using namespace voronoi;
@@ -18,11 +20,13 @@ const char* InfoPoint::toString()
         ergs = snds = "";
     }else if( snd_ == NULL)
     {
-        ergs = erg->toString();
+        ergs = erg_->toString();
     }else
     {
-        ergs = erg->toString();
-        snds = snd->toString();
+        ergs = erg_->toString();
+        snds = snd_->toString();
     }
-    return "c: " + code + " " + ergs + " " + snds;
+    std::stringstream res;
+    res<<"c: "<<code_<<" "<<ergs<<" "<<(snds);
+    return res.str().c_str(); 
 }

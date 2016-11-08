@@ -19,7 +19,8 @@ voronoi::VoroNode::VoroNode(int nodeID, int numberChildren):
     polygon_(NULL),relativeVector_(NULL),site_(NULL),toConsider_(false),treemap_(NULL),
     wantedPercentage_(0),weight_(0)
 {
-    children_=new std::vector<VoroNode*>(numberChildren);
+    if(numberChildren>0)
+        children_=new std::vector<VoroNode*>();
 }
 
 voronoi::VoroNode::~VoroNode()
@@ -175,10 +176,11 @@ void voronoi::VoroNode::iterate()
             s->setData(child);
             core_->addSite(s);
             child->setSite(s);
-            s->cellObject_ = child;//Voronode is friend class of Site
+            //s->cellObject_ = child;//No need as it was done in addSite(s);//Voronode is friend class of Site
         }
     } else 
     {
+        delete core_;
         // move my children_ so that they are in my polygon
         // use their relative Vector for that
         core_ = new VoronoiCore(polygon_);
@@ -282,9 +284,8 @@ void voronoi::VoroNode::scaleRelativeVectors()
 
     for (VoroNode* child : *children_) 
     {
-        Point2D pos = *(child->getRelativeVector());
-        pos.setLocation((pos.getX() - localCenterX) * scaleX,
-                        (pos.getY() - localCenterY) * scaleY);
+        Point2D* pos = child->getRelativeVector();
+        pos->setLocation((pos->getX() - localCenterX) * scaleX, (pos->getY() - localCenterY) * scaleY);
     }
 }
 

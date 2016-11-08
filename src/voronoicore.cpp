@@ -6,35 +6,47 @@
 
 voronoi::VoronoiCore::VoronoiCore():
     outputMode_(true),outCounter_(1),firstIteration_(true),
-    settings_(),currentIteration_(0),rectanglePoly_(false),
+    settings_(NULL),currentIteration_(0),rectanglePoly_(false),createSites_(true),
     level_(0),center_(),scale_(1.0),currentErrorMax_(0.0),
-    clipPolygon_(NULL),sites_(NULL),diagram_(),currentAreaError_(1.0)
-{}
+    clipPolygon_(NULL),sites_(NULL),diagram_(NULL),currentAreaError_(1.0)
+{
+    settings_=new VoroSettings();
+    diagram_=new PowerDiagram();
+    sites_=new std::vector<Site*>();
+}
 
 voronoi::VoronoiCore::VoronoiCore(Rectangle2D& rectangle):
     outputMode_(true),outCounter_(1),firstIteration_(true),
-    settings_(),currentIteration_(0),rectanglePoly_(false),
+    settings_(NULL),currentIteration_(0),rectanglePoly_(false),createSites_(true),
     level_(0),center_(),scale_(1.0),currentErrorMax_(0.0),
-    clipPolygon_(NULL),sites_(NULL),diagram_(),currentAreaError_(1.0)
+    clipPolygon_(NULL),sites_(NULL),diagram_(NULL),currentAreaError_(1.0)
 {
+    settings_=new VoroSettings();
+    diagram_=new PowerDiagram();
+    sites_=new std::vector<Site*>();
     setClipPolygon(rectangle);
 }
 
 voronoi::VoronoiCore::VoronoiCore(voronoi::PolygonSimple* clipPolygon):
     outputMode_(true),outCounter_(1),firstIteration_(true),
-    settings_(),currentIteration_(0),rectanglePoly_(false),
+    settings_(NULL),currentIteration_(0),rectanglePoly_(false),createSites_(true),
     level_(0),center_(),scale_(1.0),currentErrorMax_(0.0),
-    clipPolygon_(clipPolygon),sites_(NULL),diagram_(),currentAreaError_(1.0)
+    clipPolygon_(clipPolygon),sites_(NULL),diagram_(NULL),currentAreaError_(1.0)
 {
+    settings_=new VoroSettings();
+    diagram_=new PowerDiagram();
+    sites_=new std::vector<Site*>();
     diagram_->setClipPoly(clipPolygon);
 }
 
 voronoi::VoronoiCore::VoronoiCore(std::vector<voronoi::Site*>* sites, voronoi::PolygonSimple* clipPolygon):
     outputMode_(true),outCounter_(1),firstIteration_(true),
-    settings_(),currentIteration_(0),rectanglePoly_(false),
+    settings_(NULL),currentIteration_(0),rectanglePoly_(false),createSites_(false),
     level_(0),center_(),scale_(1.0),currentErrorMax_(0.0),
-    clipPolygon_(clipPolygon),sites_(sites),diagram_(),currentAreaError_(1.0)
+    clipPolygon_(clipPolygon),sites_(sites),diagram_(NULL),currentAreaError_(1.0)
 {
+    settings_=new VoroSettings();
+    diagram_=new PowerDiagram();
     diagram_->setClipPoly(clipPolygon);
 }
 
@@ -43,6 +55,7 @@ voronoi::VoronoiCore::~VoronoiCore()
     if(settings_) delete settings_;
     if(diagram_) delete diagram_;
     if(rectanglePoly_ && clipPolygon_) delete clipPolygon_;
+    if(createSites_ && sites_) delete sites_;
 }
 
 std::vector<voronoi::Site*>* voronoi::VoronoiCore::getSiteList()
@@ -159,7 +172,7 @@ void voronoi::VoronoiCore::doIterate()
 {
     if (sites_->size() <= 1)
     {
-        sites_->at(0)->setPolygon(clipPolygon_);
+        sites_->at(0)->setPolygon(clipPolygon_);//FIXME:use clipPolygon_->clone()
         return;
     }
 
@@ -273,6 +286,8 @@ void voronoi::VoronoiCore::drawState(Graphics2D g, bool isLast) {
 
 void voronoi::VoronoiCore::setSites(std::vector<voronoi::Site*>* sites)
 {
+    if(createSites_ && sites_) delete sites_;
+    createSites_=false;
     sites_ = sites;
 }
 
@@ -302,6 +317,7 @@ void voronoi::VoronoiCore::setLevel(int height) {
 }
 
 void voronoi::VoronoiCore::setSettings(voronoi::VoroSettings* coreSettings) {
+    if(settings_) delete settings_;
     settings_ = coreSettings;
 }
 

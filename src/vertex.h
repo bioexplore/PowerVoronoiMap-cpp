@@ -11,10 +11,9 @@ namespace voronoi {
 class Vertex
 {
 public:
-    double x;
-    double y;
-    double z;
-    Point2D* originalObject; //TODO:consider change to originalPoint
+    double      x;
+    double      y;
+    double      z;
 
     Vertex(double a,double b,double c);
     virtual ~Vertex();
@@ -33,9 +32,9 @@ public:
      bool                 linearDependent(Vertex* v);
 
      void                 negate();
-     Vertex              subtract(Vertex* v);
+     Vertex               subtract(Vertex* v);
 
-     Vertex              crossProduct(Vertex* v);
+     Vertex               crossProduct(Vertex* v);
      char*                toString();
 
      void                 setHandled(bool b);

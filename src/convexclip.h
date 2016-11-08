@@ -1,5 +1,6 @@
 #ifndef CONVEXCLIP_H
 #define CONVEXCLIP_H
+#include <vector>
 /**
  *
  * @author Hildenbrand, Nocaj
@@ -8,6 +9,8 @@
  */
 namespace voronoi
 {
+class Vertex;
+class Point2D;
 class InfoPoint;
 class ConvexClip
 {
@@ -15,7 +18,7 @@ public:
     /**
      * Vertex List of the final intersection with the result of the computation
      */
-    VertexList* inters;
+    std::vector<Vertex*>* inters;
 
     /**
      * Computes the sign of the area of the triangle a,b,c
@@ -25,6 +28,7 @@ public:
      * @return returns sign of the are {0,1,-1}
      */
     static int AreaSign(Point2D& a, Point2D& b, Point2D& c);
+    static int AreaSign(Vertex* a,Vertex* b,Vertex* c);
 
     /**
      *
@@ -32,7 +36,7 @@ public:
      * @param list2	second polygon for the intersection
      * @throws RuntimeException  if one of the two polygons is not convex
      */
-    void Start(VertexList& list1, VertexList& list2);
+    void Start(std::vector<Vertex*>& list1, std::vector<Vertex*>& list2);
 
     /**
      * computes the intersection of the egdes between ab and cd
@@ -50,7 +54,8 @@ private:
      * @param p2 VertexList
      * @return returns whether p2 is convex and counterclockwise oriented
      */
-    static bool isConvex(VertexList& p2);
+    static bool isConvex(std::vector<Vertex*>& p2);
+    static bool isReverseConvex(std::vector<Vertex*>& p2);
 
     /**
      * Checks if point c is between a and b or not
@@ -67,7 +72,7 @@ private:
      * @param n number of vertices of the first polygon
      * @param m number of vertices of the second polygon
      */
-    void ConvexIntersection(VertexList& p, VertexList& q, int n, int m);
+    void ConvexIntersection(std::vector<Vertex*>& p, std::vector<Vertex*>& q, int n, int m);
     /**
      * computes the dot Product
      * @param vP

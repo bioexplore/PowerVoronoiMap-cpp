@@ -4,6 +4,20 @@
 #include <limits>
 #include "polygonsimple.h"
 
+#ifdef JYXIA
+void voronoi::PolygonSimple::printSelf()
+{
+    std::cout<<"Polygon info:"<<std::endl
+            <<"\tSize:\t"<<size()<<std::endl
+            <<"\tCentroid:\t["<<centroid_->x<<","<<centroid_->y<<"]"<<std::endl
+            <<"\tArea:    \t"<<area_<<std::endl
+            <<"\tBoding box:\t["<<bounds_->getX()<<","<<bounds_->getY()<<",w"<<bounds_->getWidth()<<",h"<<bounds_->getHeight()<<"]"
+            <<std::endl;
+            if(oldPolygon_)
+                std::cout<<"\tOldPolygon:\t[Addr]"<<oldPolygon_<<std::endl;
+
+}
+#endif
 voronoi::PolygonSimple::PolygonSimple():
    std::vector<Point2D>(), area_(-1),bounds_(NULL),centroid_(NULL),oldPolygon_(NULL)
 {}
@@ -19,7 +33,8 @@ voronoi::PolygonSimple::PolygonSimple(int numberPoints):
         generateDefaultPolygon(16);
     }
 }
-
+// The user who invoke this constructor should guarentee that length 
+// do not exceed the memory occupied by xPoints and yPoints
 voronoi::PolygonSimple::PolygonSimple(double xPoints[], double yPoints[], int length):
     std::vector<Point2D>(),area_(-1),bounds_(NULL),centroid_(NULL),oldPolygon_(NULL)
 {
@@ -32,12 +47,20 @@ voronoi::PolygonSimple::PolygonSimple(double xPoints[], double yPoints[], int le
     }
 }
 
+voronoi::PolygonSimple::~PolygonSimple()
+{
+    if(bounds_) delete bounds_;
+    if(centroid_) delete centroid_;
+    if(oldPolygon_) delete oldPolygon_;
+    clear();
+}
+
 bool voronoi::PolygonSimple::contains(double inX, double inY)
 {
     bool contains = false;
     if (bounds_ == NULL)
         getBounds();
-    if (!bounds_->contains(inX, inY)) 
+    if (!(bounds_->contains(inX, inY))) 
     {
         return false;
     }
@@ -47,8 +70,8 @@ bool voronoi::PolygonSimple::contains(double inX, double inY)
     // inside.
     for (int i = 0, j = length - 1; i < length; j = i++) 
     {
-        if ((( (at(i).y <= inY) && (inY < at(j).y) || ( (at(j).y <= inY) && (inY < at(i).y) ) ) 
-                    && ( inX < (at(j).x - at(i).x) * (inY - at(i).y) / (at(j).y - at(i).y) + at(i).x)))
+        if (( ((at(i).y <= inY) && (inY < at(j).y)) || ( (at(j).y <= inY) && (inY < at(i).y) ) ) 
+                    && ( inX < (at(j).x - at(i).x) * (inY - at(i).y) / (at(j).y - at(i).y) + at(i).x))
             contains = !contains;
     }
     return contains;
@@ -135,7 +158,6 @@ int voronoi::PolygonSimple::getNumPoints()
     return size();
 }
 
-
 void voronoi::PolygonSimple::add(double x, double y)
 {
     Point2D tmpPoint;
@@ -168,7 +190,7 @@ void voronoi::PolygonSimple::clearCacheOnly()
         oldPolygon_->clearCacheOnly();
 }
 
-void voronoi::PolygonSimple::add(Point2D p)
+void voronoi::PolygonSimple::add(Point2D& p)
 {
     add(p.x, p.y);
 }
@@ -182,7 +204,7 @@ voronoi::PolygonSimple* voronoi::PolygonSimple::convexClip(PolygonSimple* poly)
         return NULL;
     //check if bounding box corners are in polygon: then poly is contained completely inside the outer polygon
     if (contains(*polyBox))
-        return poly;
+        return poly->clone();
 
     //TODO: Need to modify
     return NULL;
@@ -267,21 +289,18 @@ double voronoi::PolygonSimple::getArea()
     // we can implement it like this because the polygon is closed
     // (point2D.get(0) = point2D.get(length + 1)
     int size = (this->size()-1);
-    std::vector<Point2D>::iterator iter=begin();
     double x0=0.0,x1=0.0;
     double y0=0.0,y1=0.0;
     for (int i = 0; i < size; i++)
     {
-        x0=(iter->x);
-        y0=(iter->y);
-        iter++;
-        x1=(iter->x);
-        y1=(iter->y);
+        x0=at(i).x;
+        y0=at(i).y;
+        x1=at(i+1).x;
+        y1=at(i+1).y;
         area += (x0 * y1 - x1 * y0);
     }
-    
-    x0=begin()->x;
-    y0=begin()->y;
+    x0=at(0).x;
+    y0=at(0).y;
     area += (x1 * y0 - x0 * y1);
     area_ = std::abs(area) * 0.5;
     return area_;
@@ -290,24 +309,15 @@ double voronoi::PolygonSimple::getArea()
 //TODO:to be implemented
 double voronoi::PolygonSimple::getMinDistanceToBorder(double x, double y)
 {
-    /*
-    double result = Geometry.distancePointToSegment(this.x[length - 1],
-            this.y[length - 1],
-            this.x[0],
-            this.y[0], x, y);
-    for (int i = 0; i < (length - 1); i++)
+    Point2D p(x,y);
+    double result=getDistance(0,p);
+    for (int i=1;i<size();i++)
     {
-        double distance = Geometry.distancePointToSegment(this.x[i],
-                                                          this.y[i],
-                                                          this.x[i + 1],
-                this.y[i + 1], x, y);
-        if (distance < result)
-        {
-            result = distance;
-        }
+        double distance=getDistance(i,p);
+        if(distance<result)
+            result=distance;
     }
     return result;
-    */
 }
 
 voronoi::Point2D* voronoi::PolygonSimple::getCentroid()
@@ -318,20 +328,21 @@ voronoi::Point2D* voronoi::PolygonSimple::getCentroid()
         double yv = 0;
         double areaQuotient = getArea() * 6;
         int length=this->size()-1;
-        std::vector<Point2D>::iterator iter=begin(); 
         double x0=0.0,y0=0.0;
         double x1=0.0,y1=0.0;
         for (int i = 0; i < length; i++)
         {
-            x0=iter->x;
-            y0=iter->y;
-            ++iter;
-            x1=iter->x;
-            y1=iter->y;
+            x0=at(i).x;
+            y0=at(i).y;
+            x1=at(i+1).x;
+            y1=at(i+1).y;
             xv += (x0+x1)*(x0*y1-x1*y0);
             yv += (y0+y1)*(x0*y1-x1*y0);
         }
-        x1=begin()->x;y1=begin()->y;
+        x0=at(length).x;
+        y0=at(length).y;
+        x1=at(0).x;
+        y1=at(0).y;
         xv += (x0+x1)*(x0*y1-x1*y0);
         yv += (y0+y1)*(x0*y1-x1*y0);
         xv /= areaQuotient;
@@ -345,9 +356,9 @@ voronoi::Point2D* voronoi::PolygonSimple::getCentroid()
 voronoi::PolygonSimple* voronoi::PolygonSimple::clone()
 {
     PolygonSimple* p = new PolygonSimple;
-    for(std::vector<Point2D>::iterator point=begin();point!=end();++point)
+    for(Point2D point:*this)
     {
-       p->push_back(*point); 
+       p->push_back(point); 
     }
     p->area_=area_;
     p->getBounds();
@@ -358,7 +369,7 @@ voronoi::PolygonSimple* voronoi::PolygonSimple::clone()
 
 void voronoi::PolygonSimple::shrinkForBorder(double percentage)
 {
-    oldPolygon_ = (PolygonSimple*) this->clone();
+    oldPolygon_ = (PolygonSimple*)this->clone();
     getCentroid();
     double cx = centroid_->getX();
     double cy = centroid_->getY();
@@ -461,19 +472,18 @@ voronoi::Point2D voronoi::PolygonSimple::getRelativePosition(voronoi::Point2D ve
     {
         p1 = p2;
         p2 = at(i);
-        Point2D* intersection = getIntersectionOfSegmentAndLine(p1, p2,
-                                                               *centroid_, endPoint);
+        Point2D* intersection = getIntersectionOfSegmentAndLine(p1, p2, *centroid_, endPoint);
         if (intersection != NULL)
         {
             double deltaX = intersection->getX() - centroidX;
             double deltaY = intersection->getY() - centroidY;
-            double e = intersection->distance(*centroid_);
+            //double e = intersection->distance(*centroid_);
             double nX = centroidX + deltaX * alphaLine;
             double nY = centroidY + deltaY * alphaLine;
             return Point2D(nX, nY);
         }
     }
-   //TODO:need define return 
+   //FIXME:need define return 
     //System.out.println("Problem, relative Placement did not go right.");
     //return null;
 }
@@ -575,7 +585,7 @@ voronoi::Point2D* voronoi::PolygonSimple::getIntersection(voronoi::Point2D& p1, 
     }
 
     //FIXME bounding box intersection needs to be corrected
-    if (!(x2 >= x2 && x4 >= x1 && y2 >= y3 && y4 >= y1))
+    if (!(x2 >= x3 && x4 >= x1 && y2 >= y3 && y4 >= y1))
     {
         return NULL;
     }
@@ -654,48 +664,10 @@ voronoi::PolygonSimple* voronoi::PolygonSimple::getOriginalPolygon()
     return oldPolygon_;
 }
 
-/*
-Iterator<Point2D> voronoi::PolygonSimple::iterator()
-{
-    return new Iterator<Point2D>()
-    {
-        int i=0;
-        //@Override
-        bool hasNext()
-        {
-            return i<length;
-        }
-
-        //@Override
-        Point2D next()
-        {
-            Point2D p = new Point2D(x[i],y[i]);
-            i++;
-            return p;
-        }
-
-        //@Override
-        void remove()
-        {
-
-        }
-    };
-}*/
-
-/*
-int[] voronoi::PolygonSimple::getPointsClosed(double[] values)
-{
-    int[] x=new int[length+1];
-    for (int i = 0; i < length; i++)
-        x[i]=(int)values[i];
-    x[length]=x[0];
-    return x;
-}*/
-
 void voronoi::PolygonSimple::generateDefaultPolygon(int numPoint)
 {
     double width=500.0,height=300.0;
-    double angle=2.0*std::atan(1.0)*4.0/numPoint;
+    double angle=2.0*std::atan(1.0)*4.0/numPoint;//Here: pi = std::atan(1.0) * 4
     Point2D tmpPoint;
     for (int i=0;i<numPoint;++i)
     {
@@ -703,4 +675,23 @@ void voronoi::PolygonSimple::generateDefaultPolygon(int numPoint)
         tmpPoint.y=height*std::sin(i*angle)+height;
         push_back(tmpPoint);
     }
+}
+
+// Note: who use this func should guarantee the given edge index is valid
+double voronoi::PolygonSimple::getDistance(int edgeIndex,Point2D& p)
+{
+    Point2D& startP=at(edgeIndex);
+    Point2D& endP=(edgeIndex==size()-1)?at(0):at(edgeIndex+1);
+    double s_x=startP.x;
+    double s_y=startP.y;
+    double e_x=endP.x;
+    double e_y=endP.y;
+    double t_x=p.x;
+    double t_y=p.y;
+    double edgeLength=std::sqrt(std::pow(e_x-s_x,2.0)+std::pow(e_y-s_y,2.0));
+    double area=std::abs((e_x-s_x)*(t_y-s_y)-(t_x-s_x)*(e_y-s_y));
+    
+    // WATCHME: risk of divide by 0!!
+    double distance=area/edgeLength;
+    return distance;
 }

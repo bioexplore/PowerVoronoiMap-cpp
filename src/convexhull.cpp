@@ -22,7 +22,7 @@ using namespace voronoi;
 ConvexHull::ConvexHull():
     currentIndex_(0),permutate_(false)
 {
-    points_ = new std::vector<Vertex*>();
+    points_ = new std::vector<Vertex*>();//Content of this vector is pointer reference 
     facets_ = new std::vector<Face*>();
     created_ = new std::vector<Face*>();
     horizon_ = new std::vector<HullEdge*>();
@@ -31,25 +31,34 @@ ConvexHull::ConvexHull():
 
 ConvexHull::~ConvexHull()
 {
-    deleteList(points_,Vertex);
+    if(points_) delete points_;
     deleteList(facets_,Face);
-    deleteList(created_,Face);
-    deleteList(horizon_,HullEdge);
-    deleteList(visible_,Face);
+    //deleteList(created_,Face);
+    //deleteList(horizon_,HullEdge);//all edges are deleted by their owned face, no need to retrieve!
+    //deleteList(visible_,Face);//all content in visible_ are pointer reference, no need to retrieve!
+    if(created_) delete created_;
+    if(horizon_) delete horizon_;
+    if(visible_) delete visible_;
 }
 
 void ConvexHull::addPoint(Vertex *v)
 {
-    Vertex* tempVertex = new Vertex(v->x,v->y,v->z);
-    tempVertex->originalObject = v->originalObject;
-    tempVertex->setIndex(points_->size());
-    points_->push_back(tempVertex);
-}
-void ConvexHull::addPoint(double x, double y, double z)
-{
-    Vertex* v = new Vertex(x,y,z);
+    //Vertex* tempVertex = new Vertex(v->x,v->y,v->z);
+    //tempVertex->setIndex(points_->size());
     v->setIndex(points_->size());
     points_->push_back(v);
+}
+
+//Abandon this function,do not use it
+void ConvexHull::addPoint(double x, double y, double z)
+{
+    std::cerr<<"File:"<<__FILE__<<",line"<<__LINE__<<std::endl
+        <<"function:ConvexHull::addPoint(double,double,double) is abandoned, use addPoint(Vertex*)!!"<<std::endl;
+    exit(1);
+    /*Vertex* v = new Vertex(x,y,z);
+    v->setIndex(points_->size());
+    points_->push_back(v);
+    */
 }
 
 std::vector<Face*>* ConvexHull::compute()

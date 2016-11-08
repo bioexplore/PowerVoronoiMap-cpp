@@ -1,3 +1,6 @@
+#ifdef JYXIA
+#include <iostream>
+#endif
 #include "treedata.h"
 
 voronoi::TreeData::TreeData():
@@ -5,6 +8,7 @@ voronoi::TreeData::TreeData():
 {
     init();
 }
+
 voronoi::TreeData::~TreeData()
 {
     if(tree_) delete tree_;
@@ -29,9 +33,9 @@ void voronoi::TreeData::setWeight(std::string name,double weight)
     if(weight<=0) return;
     const auto& findId=nodeNameToId_->find(name);
     if(findId==nodeNameToId_->end()) return;
-    int id=(*findId).second;
+    int id=findId->second;
     const auto& findNodeIter=nodeAtt_->find(id);
-    Node* findNode=(*findNodeIter).second;
+    Node* findNode=findNodeIter->second;
     findNode->weight=weight;
 }
 
@@ -49,14 +53,15 @@ void voronoi::TreeData::addLink(std::string childName,std::string parentName)
     if(findChild==nodeNameToId_->end())
         createNode(childName);
     
-    const auto& findParent1=nodeNameToId_->find(parentName);
-    const auto& findChild1=nodeNameToId_->find(childName);
-    childNode=nodeAtt_->operator[](findChild1->second);
-    parentNode=nodeAtt_->operator[](findParent1->second);
+    findParent=nodeNameToId_->find(parentName);
+    findChild=nodeNameToId_->find(childName);
+    childNode=nodeAtt_->operator[](findChild->second);
+    parentNode=nodeAtt_->operator[](findParent->second);
 
     childNode->parentId=parentNode->nodeId;
     tree_->at(parentNode->nodeId).push_back(childNode->nodeId);
 }
+
 int voronoi::TreeData::getRootIndex()
 {
     return rootIndex_;
@@ -73,7 +78,7 @@ std::unordered_map<int, voronoi::TreeData::Node*>* voronoi::TreeData::getNodeAtt
 
 void voronoi::TreeData::init()
 {
-    tree_=new std::vector<std::vector<int>>();
+    tree_=new std::vector<std::vector<int> >();
     rootIndex_=0;
     nodeAtt_=new std::unordered_map<int, TreeData::Node*>();
     nodeNameToId_=new std::unordered_map<std::string, int>();
@@ -81,7 +86,7 @@ void voronoi::TreeData::init()
 voronoi::TreeData::Node* voronoi::TreeData::createNode(std::string name)
 {
     int index=tree_->size();
-    Node *node=new TreeData::Node();
+    Node *node=new Node();
     node->nodeId=index;
     node->parentId=index;
     node->name=name;
@@ -92,3 +97,24 @@ voronoi::TreeData::Node* voronoi::TreeData::createNode(std::string name)
     nodeNameToId_->insert({name, index});
     return node;
 }
+
+//=============Debug==============//
+#ifdef JYXIA
+void voronoi::TreeData::printSelf()
+{
+    std::cout<<"TreeData content:"<<std::endl
+             <<"\tTotal node number:"<<tree_->size()<<std::endl;
+    int size=tree_->size();
+    for(int i=0;i<size;i++)
+    {
+        std::vector<int>& children=tree_->at(i);
+        int id=children[0];
+        std::cout<<"\tParent:("<<id<<","<<(nodeAtt_->operator[](id))->name<<")"<<std::endl;
+        for(int j=1;j<children.size();j++)
+        {
+            std::cout<<((j==1)?("\t\tchildrens:"):("-"))<<"("<<children[j]<<","<<(nodeAtt_->operator[](children[j]))->name<<")"
+                <<((j==children.size()-1)?("\n"):(""));
+        }
+    }
+}
+#endif

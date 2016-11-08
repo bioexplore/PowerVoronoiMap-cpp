@@ -1,34 +1,38 @@
 #include "vertex.h"
 #include "conflictlist.h"
-using namespace voronoi;
 
-Vertex::Vertex(double a,double b,double c):
-   x(a),y(b),z(c),originalObject(NULL),handled_(false)
+voronoi::Vertex::Vertex(double a,double b,double c):
+   x(a),y(b),z(c),handled_(false),index_(-1)
 {
    list_=new ConflictList(false);
-   index_=-1;
 }
-Vertex::~Vertex()
+
+voronoi::Vertex::~Vertex()
 {
    if(list_)    delete list_; 
 }
-ConflictList* Vertex::getList()                   
+
+voronoi::ConflictList* voronoi::Vertex::getList()                   
 { 
     return list_;
 }
-void  Vertex::setList(ConflictList* list)     
+
+void  voronoi::Vertex::setList(ConflictList* list)     
 {
     list_=list;
 }
-int   Vertex::getIndex()                  
+
+int   voronoi::Vertex::getIndex()                  
 {   
     return index_;
 }
-void  Vertex::setIndex(int idex)          
+
+void  voronoi::Vertex::setIndex(int idex)          
 {
     index_=idex;
 }
-bool  Vertex::equals(Vertex* v)      
+
+bool  voronoi::Vertex::equals(Vertex* v)      
 {
     if(v->x==x && v->y==y && v->z==z) 
         return true; 
@@ -40,7 +44,7 @@ bool  Vertex::equals(Vertex* v)
  * @param v Vertex compared to
  * @return Whether give vertex and the object are linearly dependent
  */
-bool Vertex::linearDependent(Vertex* v)
+bool voronoi::Vertex::linearDependent(Vertex* v)
 {
     if(x == 0 && v->x == 0)
     {
@@ -73,21 +77,24 @@ bool Vertex::linearDependent(Vertex* v)
         return false;
 }
 
-void  Vertex::negate()        
+void  voronoi::Vertex::negate()        
 {
     x*=-1;
     y*=-1;
     z*=-1;
 }
-Vertex  Vertex::subtract(Vertex* v)     
+
+voronoi::Vertex  voronoi::Vertex::subtract(Vertex* v)     
 {
     return Vertex(x-v->x,y-v->y,z-v->z);
 }
-Vertex  Vertex::crossProduct( Vertex* v)
+
+voronoi::Vertex  voronoi::Vertex::crossProduct( Vertex* v)
 {
     return Vertex(y*(v->z)-z*(v->y),z*(v->x)-x*(v->z),x*(v->y)-y*(v->x));
 }
-char*   Vertex::toString()
+
+char*   voronoi::Vertex::toString()
 {
    char* buf=0;
    buf=new char[25];
@@ -95,28 +102,30 @@ char*   Vertex::toString()
    return buf;
 }
 
-void  Vertex::setHandled(bool b)      
+void  voronoi::Vertex::setHandled(bool b)      
 {
     handled_=b;
 }
-bool  Vertex::isHandled()             
+
+bool  voronoi::Vertex::isHandled()             
 {
     return handled_;
 }
 
-double  Vertex::getX()      
+double  voronoi::Vertex::getX()      
 {
     return x;
 }
-double  Vertex::getY()      
+
+double  voronoi::Vertex::getY()      
 {
     return y;
 }
-void    Vertex::clear()
+
+void    voronoi::Vertex::clear()
 {
     list_->removeAll();
     index_=-1;
     handled_=false;
 }
-
 

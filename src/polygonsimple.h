@@ -1,218 +1,76 @@
 #ifndef POLYGONSIMPLE_H
 #define POLYGONSIMPLE_H
 #include <vector>
+#include <iostream>
 #include "rectangle2d.h"
 #include "point2d.h"
-#include "vertex.h"
 namespace voronoi {
 /**
- * Implements a simple polygon with one continous region, by using two double arrays.
- * @author Arlind Nocaj
+ * Implements a simple polygon with one continous region.
+ * @author Jianye Xia 
  *
  */
 class PolygonSimple:public std::vector<Point2D>
 {
 public:
     PolygonSimple();
-    int length();
-
-    /**
-     *
-     * @param numberPoints initial array size, default initial array size is 16.
-     */
     PolygonSimple(int numberPoints);
+    PolygonSimple(double xPoints[], double yPoints[], int length);
+    ~PolygonSimple();
 
-    /**
-     *
-     * @param xPoints x-coordinate of the polygon points
-     * @param yPoints y-coordinate of the polygon points
-     * @param length number of elements which should be considered from the given arrays
-     */
-    PolygonSimple(double xPoints[], double yPoints[], int length );
+    bool            contains(double inX, double inY);
+    bool            contains(Rectangle2D r);
+    bool            contains(Point2D p);
+    bool            contains(double x, double y, double w, double h);
+    bool            intersects(Rectangle2D& r);
+    bool            intersects(double x, double y, double w, double h);
 
-    /**
-     * tests whether the given point is contained in the polygon (linear time).
-     */
-    bool contains(double inX, double inY);
+    int             length();
+    int             getNumPoints();
+    double          getArea();
+    double          getMinDistanceToBorder(double x, double y);
+    Point2D*        getCentroid();
+    Point2D         getRelativePosition(Point2D& vector);
+    Point2D         getInnerPoint();
+    Rectangle2D*    getBounds();
+    Rectangle2D*    getBounds2D();
+    PolygonSimple*  getOriginalPolygon();
 
-    /**
-     * {@link #contains(double, double, double, double)}
-     */
-    bool contains(Rectangle2D r);
-
-    /**
-     * {@link #contains(double, double)}
-     */
-    bool contains(Point2D p);
-
-    /**
-     * tests whether each corner point of the given rectangle is contained in the polygon.
-     */
-    //@Override
-    bool contains(double x, double y, double w, double h);
-
-    //@Override
-    Rectangle2D* getBounds2D();
-
-    /**
-     * tests whether the given rectangle will intersect to the bounds of the polygon.
-     */
-    //@Override
-    bool intersects(Rectangle2D& r);
-
-    /**
-     * {@link #intersects(Rectangle2D)}
-     */
-    //@Override
-    bool intersects(double x, double y, double w, double h);
-
-    /**
-     * Returns the bounding rectangle of this polygon.
-     */
-    Rectangle2D* getBounds();
-
-    /**
-     * Return the number of points in this polygon.
-     * @return integer number of points
-     */
-    int getNumPoints();
-
-    /**
-     * Adds a point to the polygon. Extends the corresponding array if necessary.
-     */
-    void add(double x, double y);
-
-    /**
-     * Scales all points by multiplying with the scalingFactor
-     *
-     * @param scalingFactor
-     */
-    void scale(double scalingFactor);
-
-    /**
-     * Translates all points of the polygon by adding the values
-     * @param tx translation on x
-     * @param ty translation on y
-     */
-    void translate(double tx, double ty);
-
-    void clearCacheOnly();
-
-    /**
-     * {@link #add(double, double)}
-     */
-    void add(Point2D p);
-
-
-    /**
-     * Uses the linear time algorithm of O'Rourke to compute the intersection of
-     * two convex polygons.
-     *
-     * @param poly
-     * @return
-     */
-    PolygonSimple* convexClip(PolygonSimple* poly);
-
-    /**
-     * Returns the area of the polygon.
-     */
-    double getArea();
-
-    /**
-     * For the given point, the minimal distance to the segments of the polygon
-     * is computed.
-     *
-     * @param x
-     * @param y
-     * @return
-     */
-    double getMinDistanceToBorder(double x, double y);
-
-    /**
-     * Computes the centroid of a polygon.
-     *
-     * @return centroid point
-     */
-    Point2D* getCentroid();
-
-    //@Override
-    PolygonSimple* clone();
-
-    /**
-     * Default percentage can be 0.96
-     *
-     * @param percentage
-     */
-    void shrinkForBorder(double percentage);
-
-    /**
-     * We get a vector which describes where the point should be relative to the
-     * center. We change the length of the vector so that the point fits in the
-     * polygon. (reimplementation needed here)
-     *
-     * @return Point which is contained by this polygon and has same direction
-     *         as the given vector point
-     */
-    Point2D getRelativePosition(Point2D& vector);
-
-        /**
-     * Returns a random point in the polygon.
-     * @return
-     */
-    Point2D getInnerPoint();
-
-
-    /**
-     * Array with x-values of the polygon points.
-     * @return
-     */
     std::vector<double> getXPoints();
-
-    /**
-     * Array with y-values of the polygon points.
-     * @return
-     */
     std::vector<double> getYPoints();
+    
+    void            add(double x, double y);
+    void            add(Point2D& p);
+    void            scale(double scalingFactor);
+    void            translate(double tx, double ty);
+    void            clearCacheOnly();
+    void            shrinkForBorder(double percentage);
+    PolygonSimple*  clone();
+    PolygonSimple*  convexClip(PolygonSimple* poly);
 
-    /**
-     * If the polygon is modified by e.g. shrinking, this method returns the original polygon. If the polyogn was not modified, it can return null.
-     * @return
-     */
-    PolygonSimple* getOriginalPolygon();
-    //@Override
-    //Iterator<Point2D> iterator();
-    //int[] getXpointsClosed();
-    //int[] getYpointsClosed();    
+#ifdef JYXIA
+    void            printSelf();
+#endif
+
 protected:
-    /**
-     * Used for generation of a random point in a polygon.
-     */
-    //Random seed = new Random(5);
-
-    /**
-     * centroid of the polygon is stored for faster access, once it is computed
-     */
-    Point2D* 	    centroid_;
     double 	        area_;
+    Point2D* 	    centroid_;
     Rectangle2D*    bounds_;
 
-    /**
-     * Stores the orginal polygon result, without shrinking
-     */
     PolygonSimple*  oldPolygon_;
 
 private:
     //int[] getPointsClosed(std::vector<double> values);
-    int* getPointsClosed(std::vector<double> values);
+    int*            getPointsClosed(std::vector<double> values);
 
     /**
      * Debugging only
      * @param poly
      */
-    Point2D* containsPoly(PolygonSimple* poly);
+    Point2D*        containsPoly(PolygonSimple* poly);
 
     //VertexList getVertexList();
-    std::vector<Point2D>* getVertexList();
+    std::vector<Point2D>*   getVertexList();
 
     /**
      * Computes the intersection point iff (inx,iny) is within the polygon and (outx,outy) is outside of the polygon.
@@ -223,7 +81,7 @@ private:
      * @param outy y-coordinate of the presumably outer point
      * @return Intersection Point
      */
-    Point2D* getIntersectionWithPolygon(double inx, double iny, double outx, double outy);
+    Point2D*        getIntersectionWithPolygon(double inx, double iny, double outx, double outy);
 
     /**
      * intersection of two lines formed by the given points:
@@ -235,7 +93,7 @@ private:
      * @param p4
      * @return
      */
-    Point2D* getIntersection(Point2D& p1, Point2D& p2,Point2D& p3, Point2D& p4);
+    Point2D*        getIntersection(Point2D& p1, Point2D& p2,Point2D& p3, Point2D& p4);
     
     /**
      * Return the intersection of the segment given bei p1 and p2 and the line
@@ -259,9 +117,10 @@ private:
      * @return Point which is contained by this polygon and has same direction
      *         as the given vector point
      */
-    Point2D getRelativePosition(Point2D vector, double alphaLine);
+    Point2D         getRelativePosition(Point2D vector, double alphaLine);
 
-    void generateDefaultPolygon(int);
+    void            generateDefaultPolygon(int);
+    double          getDistance(int edegIndex,Point2D& p);//Helper function for calculating distance from point p to the edgeIndex edge fragment
 
 };
 }

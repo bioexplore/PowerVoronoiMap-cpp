@@ -2,6 +2,7 @@
 #define STATUSOBJECT_HEADER
 namespace voronoi
 {
+class PolygonSimple;
 class StatusObject
 {
 public:

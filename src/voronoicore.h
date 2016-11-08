@@ -99,6 +99,12 @@ private:
     bool rectanglePoly_;
 
     /**
+     * If true, means this obj's sites_ is constructed by allocating memories
+     * and it should be retrieved when desturction
+     */
+    bool createSites_;
+
+    /**
      * core variables
      */
     bool firstIteration_;// = true;
