@@ -3,6 +3,7 @@
 #include <ctime>
 #include <limits>
 #include "polygonsimple.h"
+#include "convexclip.h"
 
 #ifdef JYXIA
 void voronoi::PolygonSimple::printSelf()
@@ -207,50 +208,49 @@ voronoi::PolygonSimple* voronoi::PolygonSimple::convexClip(PolygonSimple* poly)
         return poly->clone();
 
     //TODO: Need to modify
-    return NULL;
-    /*
+    //return NULL;
     //bounding boxes intersect
     // to vertexList
-    cVertexList list1 = this.getVertexList();
-    cVertexList list2 = poly.getVertexList();
-    ConvexClip clipper = new ConvexClip();
+    std::vector<Point2D>& list1 = *this;
+    std::vector<Point2D>& list2 = *poly;
+
+    ConvexClip clipper;// = new ConvexClip();
     //		list1.PrintVertices();
     //		list2.PrintVertices();
     clipper.Start(list1, list2);
-    PolygonSimple res = new PolygonSimple();
-    if (clipper.inters != null && clipper.inters.n > 0)
+    PolygonSimple* res = new PolygonSimple();
+    if (clipper.inters != NULL && clipper.inters->size() > 0)
     {
-        cVertex node = clipper.inters.head;
-        double firstX = node.v.x;
-        double firstY = node.v.y;
-        res.add(node.v.x, node.v.y);
-        double lastX = node.v.x;
-        double lastY = node.v.y;
-        for (int i = 1; i < clipper.inters.n; i++)
+        std::vector<Point2D>::iterator iter=clipper.inters->begin();
+        Point2D node = *iter;
+        double firstX = node.x;
+        double firstY = node.y;
+        res->add(node.x, node.y);
+        double lastX =firstX; 
+        double lastY =firstY;
+        for (int i = 1; i < clipper.inters->size(); i++)
         {
-            node = node.next;
+            node = *(++iter);
 
-            if (lastX != node.v.x || lastY != node.v.y) // do not add point
+            if (lastX != node.x || lastY != node.y) // do not add point
             {
                 // if its the same as before
-                if (i != (clipper.inters.n - 1) || (node.v.x != firstX)
-                        || node.v.y != firstY) // do not add if it is the
+                if (i != (clipper.inters->size() - 1) || (node.x != firstX) || node.y != firstY) // do not add if it is the
                 {
                     // end point and the same as
                     // the first point
-                    res.add(node.v.x, node.v.y);
+                    res->add(node.x,node.y);
                 }
             }
         }
         return res;
     }
     //no intersection between the two polygons, so check if one is inside the other
-    if(contains(poly.x[0],poly.y[0]))
+    if(contains(poly->at(0)))
         return poly;
 
     // no intersection between the polygons at all
-    return null;
-    */
+    return NULL;
 }
 
 

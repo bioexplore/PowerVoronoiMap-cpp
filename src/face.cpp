@@ -109,7 +109,7 @@ bool voronoi::Face::behind( Vertex *p)
     return (normal_->dot(p) < normal_->dot(v0_));
 }
 
-bool voronoi::Face::conflict( Vertex* p)
+bool voronoi::Face::conflict( Vertex* p)//p is outside of the convexhull
 {
     return (normal_->dot(p) > (normal_->dot(v0_)+epsilon_));
 }

@@ -18,8 +18,17 @@ public:
     /**
      * Vertex List of the final intersection with the result of the computation
      */
-    std::vector<Vertex*>* inters;
+    std::vector<Point2D>* inters;
 
+    ConvexClip();
+    ~ConvexClip();
+    
+    enum InsideFlag
+    {
+        PIN,
+        QIN,
+        UNKNOWN
+    };
     /**
      * Computes the sign of the area of the triangle a,b,c
      * @param a
@@ -28,7 +37,6 @@ public:
      * @return returns sign of the are {0,1,-1}
      */
     static int AreaSign(Point2D& a, Point2D& b, Point2D& c);
-    static int AreaSign(Vertex* a,Vertex* b,Vertex* c);
 
     /**
      *
@@ -36,7 +44,7 @@ public:
      * @param list2	second polygon for the intersection
      * @throws RuntimeException  if one of the two polygons is not convex
      */
-    void Start(std::vector<Vertex*>& list1, std::vector<Vertex*>& list2);
+    void Start(std::vector<Point2D>& list1, std::vector<Point2D>& list2);
 
     /**
      * computes the intersection of the egdes between ab and cd
@@ -54,8 +62,8 @@ private:
      * @param p2 VertexList
      * @return returns whether p2 is convex and counterclockwise oriented
      */
-    static bool isConvex(std::vector<Vertex*>& p2);
-    static bool isReverseConvex(std::vector<Vertex*>& p2);
+    static bool isConvex(std::vector<Point2D>& p2);
+    static bool isReverseConvex(std::vector<Point2D>& p2);
 
     /**
      * Checks if point c is between a and b or not
@@ -72,7 +80,7 @@ private:
      * @param n number of vertices of the first polygon
      * @param m number of vertices of the second polygon
      */
-    void ConvexIntersection(std::vector<Vertex*>& p, std::vector<Vertex*>& q, int n, int m);
+    void ConvexIntersection(std::vector<Point2D>& p, std::vector<Point2D>& q, int n, int m);
     /**
      * computes the dot Product
      * @param vP

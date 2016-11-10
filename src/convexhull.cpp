@@ -4,7 +4,6 @@
 #include "face.h"
 #include "convexhull.h"
 #include "conflictlist.h"
-using namespace voronoi;
 #define deleteList(objectListPointer,elementType) \
     if(objectListPointer)               \
     {                                   \
@@ -19,7 +18,7 @@ using namespace voronoi;
 
 //const static
 
-ConvexHull::ConvexHull():
+voronoi::ConvexHull::ConvexHull():
     currentIndex_(0),permutate_(false)
 {
     points_ = new std::vector<Vertex*>();//Content of this vector is pointer reference 
@@ -29,7 +28,7 @@ ConvexHull::ConvexHull():
     visible_ = new std::vector<Face*>();
 }
 
-ConvexHull::~ConvexHull()
+voronoi::ConvexHull::~ConvexHull()
 {
     if(points_) delete points_;
     deleteList(facets_,Face);
@@ -41,7 +40,7 @@ ConvexHull::~ConvexHull()
     if(visible_) delete visible_;
 }
 
-void ConvexHull::addPoint(Vertex *v)
+void voronoi::ConvexHull::addPoint(Vertex *v)
 {
     //Vertex* tempVertex = new Vertex(v->x,v->y,v->z);
     //tempVertex->setIndex(points_->size());
@@ -50,10 +49,10 @@ void ConvexHull::addPoint(Vertex *v)
 }
 
 //Abandon this function,do not use it
-void ConvexHull::addPoint(double x, double y, double z)
+void voronoi::ConvexHull::addPoint(double x, double y, double z)
 {
     std::cerr<<"File:"<<__FILE__<<",line"<<__LINE__<<std::endl
-        <<"function:ConvexHull::addPoint(double,double,double) is abandoned, use addPoint(Vertex*)!!"<<std::endl;
+        <<"function:voronoi::ConvexHull::addPoint(double,double,double) is abandoned, use addPoint(Vertex*)!!"<<std::endl;
     exit(1);
     /*Vertex* v = new Vertex(x,y,z);
     v->setIndex(points_->size());
@@ -61,12 +60,12 @@ void ConvexHull::addPoint(double x, double y, double z)
     */
 }
 
-std::vector<Face*>* ConvexHull::compute()
+std::vector<voronoi::Face*>* voronoi::ConvexHull::compute()
 {
     prep();//Make the initial 4 facets that constitute a tetrahedron
     while(currentIndex_ < points_->size()){
         Vertex* nextP = points_->at(currentIndex_);
-        if(nextP->getList()->empty())
+        if(nextP->getList()->empty())//the conflictlist is empty means the point is in the convexhull
         {
             currentIndex_++;
             continue;
@@ -125,6 +124,9 @@ std::vector<Face*>* ConvexHull::compute()
             currentIndex_++;
             created_->clear();//Don't need to clean the memory allocated as all facets generated are appended to faces_
                               //and they will be taken care during the destruction
+        }else
+        {
+            currentIndex_++;
         }
     }
     return facets_;
@@ -133,7 +135,7 @@ std::vector<Face*>* ConvexHull::compute()
  * Function addConflicts will make ConflictList of the new created Face
  * fnew based on ConflictList of old Faces old1 and old2
  */
-void ConvexHull::addConflicts(Face* old1,Face* old2, Face* fnew)
+void voronoi::ConvexHull::addConflicts(Face* old1,Face* old2, Face* fnew)
 {
     //Adding the vertices
     std::vector<Vertex*> *plist1=new std::vector<Vertex*>();
@@ -188,7 +190,7 @@ void ConvexHull::addConflicts(Face* old1,Face* old2, Face* fnew)
     delete plist2;
     delete nCL;
 }
-void    ConvexHull::removeConflict(Face* f)
+void    voronoi::ConvexHull::removeConflict(Face* f)
 {
     f->removeConflict();//clear face's ConflictList
     int index = f->getIndex();
@@ -213,7 +215,7 @@ void    ConvexHull::removeConflict(Face* f)
     return;
 }
 
-void    ConvexHull::prep()
+void voronoi::ConvexHull::prep()
 {
     if(points_->size()<=3)
     {
@@ -299,7 +301,7 @@ void    ConvexHull::prep()
 }
 
 //Not implemented
-void ConvexHull::permutation()
+void voronoi::ConvexHull::permutation()
 {
     /*
     int pointCount=points_->size();
@@ -315,12 +317,12 @@ void ConvexHull::permutation()
     }
     */
 }
-void ConvexHull::addFacet(Face* f0)
+void voronoi::ConvexHull::addFacet(Face* f0)
 {
     f0->setIndex(facets_->size());
     facets_->push_back(f0);
 }
-void ConvexHull::addConflict(Face* f0,Vertex* v)
+void voronoi::ConvexHull::addConflict(Face* f0,Vertex* v)
 {
     GraphEdge *e=new GraphEdge(f0,v);
     f0->getList()->add(e);

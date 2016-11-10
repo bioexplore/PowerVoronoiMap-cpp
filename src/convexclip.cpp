@@ -4,6 +4,13 @@
 #include "vertex.h"
 #include "infopoint.h"
 //using namespace voronoi;
+
+voronoi::ConvexClip::ConvexClip():inters(NULL){}
+voronoi::ConvexClip::~ConvexClip()
+{
+    if (inters) delete inters;
+}
+
 int voronoi::ConvexClip::AreaSign(Point2D& a, Point2D& b, Point2D& c)
 {
     double area;
@@ -12,18 +19,11 @@ int voronoi::ConvexClip::AreaSign(Point2D& a, Point2D& b, Point2D& c)
     else if( area < -0.000005) return -1;
     else return 0; //means a, b, c are on the same line
 }
-int voronoi::ConvexClip::AreaSign(Vertex* a, Vertex* b, Vertex* c)
-{
-    double area=(b->x-a->x)* (c->y-a->y) - (c->x - a->x) * (b->y - a->y);
-    if( area > 0.000005) return 1;
-    else if( area < -0.000005) return -1;
-    else return 0;
-}
 
-void voronoi::ConvexClip::Start(std::vector<Vertex*>& list1, std::vector<Vertex*>& list2)
+void voronoi::ConvexClip::Start(std::vector<Point2D>& list1, std::vector<Point2D>& list2)
 {
-    std::vector<Vertex*>& p = list1;//.copyList();
-    std::vector<Vertex*>& q = list2;//.copyList();
+    std::vector<Point2D>& p = list1;//.copyList();
+    std::vector<Point2D>& q = list2;//.copyList();
     if(!isConvex(p)||!isReverseConvex(p))
     { //Check for convexity
         std::cerr<<"Polygons are not Convex..."<<std::endl;
@@ -35,52 +35,52 @@ void voronoi::ConvexClip::Start(std::vector<Vertex*>& list1, std::vector<Vertex*
             //throw new RuntimeException("Polygons are not Convex...");//TODO: add exception throw
     }
     if(inters) delete inters;
-    inters = new std::vector<Vertex*>(); //result list
+    inters = new std::vector<Point2D>(); //result list
     ConvexIntersection(p,q,p.size(),q.size());
 }
 
 voronoi::InfoPoint voronoi::ConvexClip::intersect(Point2D& a, Point2D& b, Point2D& c, Point2D& d)
 {
     double t,s,denum;
-    denum = ((d.x-c.x)*(b.y-a.y) - (b.x-a.x)* (d.y-c.y));//cross product of vec(c->d) and vec(a->b)
+    denum = ((b.x-a.x)*(d.y-c.y) - (d.x-c.x)* (b.y-a.y));//cross product of vec(c->d) and vec(a->b)
     if(denum == 0)// means vec(a->b) is parallel to vec(c->d)
     {
         if(AreaSign(a,b,c) == 0)
         { //Collinear
-            if(between(a,b,c) && between (a,b,d))
+            if(between(a,b,c) && between (a,b,d))// Condition like ( *a-----*c----------*d-------*b)
             {
-                return new InfoPoint(c,d,'e');
+                return InfoPoint(&c,&d,'e');
             }
-            if(between(c,d,a) && between (c,d,b))
+            if(between(c,d,a) && between (c,d,b))// Condition like ( *c-----*a--------*b-------*d)
             {
-                return new InfoPoint(a,b,'e');
+                return InfoPoint(&a,&b,'e');
             }
-            if(between(a,b,c) && between (c,d,b))
+            if(between(a,b,c) && between (c,d,b))// Condition like ( *a-----*c-----*b------*d)
             {
-                return new InfoPoint(c,b,'e');
+                return InfoPoint(&c,&b,'e');
             }
-            if(between(a,b,c) && between (c,d,a))
+            if(between(a,b,c) && between (c,d,a))// Condition like ( *d-------*a-------*c---*b)
             {
-                return new InfoPoint(c,a,'e');
+                return InfoPoint(&c,&a,'e');
             }
-            if(between(a,b,d) && between (c,d,b))
+            if(between(a,b,d) && between (c,d,b))// Condition like ( *a----*d-----*b------*c)
             {
-                return new InfoPoint(d,b,'e');
+                return InfoPoint(&d,&b,'e');
             }
-            if(between(a,b,d) && between (c,d,a))
+            if(between(a,b,d) && between (c,d,a))// Condition like ( *c----*a----*d----*b)
             {
-                return new InfoPoint(d,a,'e');
+                return InfoPoint(&d,&a,'e');
             }
         }
-        return new InfoPoint(null,'n'); //no intersection, parallel  //TODO: define a nullpoint Point2D object that has nothing in it!
+        return InfoPoint(NULL,'n'); //no intersection, parallel  //TODO: define a nullpoint Point2D object that has nothing in it!
     }
-    t = (a.x*(d.y -c.y) - a.y*(d.x-c.x) + c.y * (d.x-c.x) - c.x * (d.y-c.y))/denum;
-    s = ((b.x-a.x) * a.y + c.x * (b.y - a.y) - a.x * (b.y -a.y) - c.y * (b.x - a.x))/-denum;
+    t = ((c.x-a.x)*(d.y -c.y) - (c.y-a.y)*(d.x-c.x))/denum;
+    s = ((a.x-c.x)*(b.y-a.y)-(a.y-c.y)*(b.x-a.x))/-denum;
     if(t >= 0 && t <= 1 && s >= 0 && s <= 1)
     {
-        return new InfoPoint(new Point2D(a.x + t*(b.x-a.x),a.y + t*(b.y-a.y)),'1'); //Proper intersection
+        return InfoPoint(new Point2D(a.x + t*(b.x-a.x),a.y + t*(b.y-a.y)),'1',true); //Proper intersection
     }
-    return new InfoPoint(null,'n');
+    return InfoPoint(NULL,'n');
 }
 
 //=============PRIVATE MEMBER FUNCS============\\
@@ -93,15 +93,16 @@ bool voronoi::ConvexClip::between(Point2D& a, Point2D& b, Point2D& c)
         return (c.y >= a.y && c.y <= b.y) || (c.y <= a.y && c.y >= b.y);
 }
 
-bool voronoi::ConvexClip::isConvex(std::vector<Vertex*>& p2)
+bool voronoi::ConvexClip::isConvex(std::vector<Point2D>& p2)
 {
     if(p2.size() < 3)
     {
         return false;
     }
-    Vertex* v1=NULL;
-    Vertex* v2=NULL;
-    Vertex* v3=NULL; int i=0;
+    Point2D& v1=p2[0];
+    Point2D& v2=p2[1];
+    Point2D& v3=p2[2]; 
+    int i=0;
     do
     {
        v1=p2[i];
@@ -119,15 +120,15 @@ bool voronoi::ConvexClip::isConvex(std::vector<Vertex*>& p2)
     return true;
 }
 
-bool voronoi::ConvexClip::isReverseConvex(std::vector<Vertex*>& p2)
+bool voronoi::ConvexClip::isReverseConvex(std::vector<Point2D>& p2)
 {
     if(p2.size() < 3)
     {
         return false;
     }
-    Vertex* v1=NULL;
-    Vertex* v2=NULL;
-    Vertex* v3=NULL; 
+    Point2D& v1=p2[0];
+    Point2D& v2=p2[1];
+    Point2D& v3=p2[2]; 
     int i=p2.size()-1;
     do
     {
@@ -146,47 +147,53 @@ bool voronoi::ConvexClip::isReverseConvex(std::vector<Vertex*>& p2)
     return true;
 }
 
-void voronoi::ConvexClip::ConvexIntersection(std::vector<Vertex*>& p, std::vector<Vertex*>& q, int n, int m)
+//Who invoke this function should make sure p and q is not empty, and n <=p.size() m<=q.size();
+void voronoi::ConvexClip::ConvexIntersection(std::vector<Point2D>& p, std::vector<Point2D>& q, int n, int m)
 {
-    cVertex *currp = p.head, *currq = q.head; //current vertex of both polygons
-    InsideFlag flg = InsideFlag.UNKNOWN; //Information flag whether p or q is on the inside (or if it is unknown)
+    std::vector<Point2D>::iterator iterP=p.begin();
+    std::vector<Point2D>::iterator iterQ=q.begin();
+    Point2D& currP = p[0];
+    Point2D& prevP = p[p.size()-1];
+    Point2D& currQ = q[0]; //current vertex of both polygons
+    Point2D& prevQ = q[q.size()-1];
+    InsideFlag flg = UNKNOWN; //Information flag whether p or q is on the inside (or if it is unknown)
     int ap = 0, aq = 0;		// counter for the termination condition(ap = advance p,aq = advance q)
     Point2D nil; // (0,0) Vertex
     Point2D vQ,vP; //current directed edges of both polygons
     bool FirstPoint = true; //Flag whether first point or not
     do
     {
-        InfoPoint c = intersect(currp->prev->v, currp->v, currq->prev->v, currq->v); //Intersection of two polygon edges
-        vQ = Point2D(currq->v.x - currq->prev->v.x,currq->v.y - currq->prev->v.y);
-        vP = Point2D(currp->v.x - currp->prev->v.x,currp->v.y - currp->prev->v.y);
+        InfoPoint c = intersect(prevP, currP, prevQ, currQ); //Intersection of two polygon edges
+        vQ = Point2D(currQ.x - prevQ.x, currQ.y - prevQ.y);
+        vP = Point2D(currP.x - prevP.x, currP.y - prevP.y);
         int cross = AreaSign(nil,vP,vQ); //sign of crossproduct of vP and vQ
-        int pInQ  = AreaSign(currq->prev->v, currq->v, currp->v); // if currp is on the half plane of q
-        int qInP  = AreaSign(currp->prev->v, currp->v, currq->v); // if currq is on the half plane of p
-        if(c.code == '1')
+        int pInQ  = AreaSign(prevQ, currQ, currP); // if currp is on the half plane of q
+        int qInP  = AreaSign(prevP, currP, currQ); // if currq is on the half plane of p
+        if(c.code() == '1')
         { // Proper intersection
-            if (flg == InsideFlag.UNKNOWN && FirstPoint) 
+            if (flg == UNKNOWN && FirstPoint) 
             {
                 FirstPoint = false;
                 ap = aq = 0;
             }
-            inters->InsertBeforeHead(new cVertex(c.erg)); //Adding the intersection to the result
+
+            inters->push_back(c.erg()); //Adding the intersection to the result
             //Flag update
             if(pInQ > 0)
             {
-                flg = InsideFlag.PIN;
+                flg = PIN;
             }else if(qInP > 0)
             {
-                flg = InsideFlag.QIN;
+                flg = QIN;
             }
         }
         //Advance Rules:
         // vP and vQ overlap and oppositely oriented
-        if(c.code == 'e' && dot(vP,vQ) < 0)
+        if(c.code() == 'e' && dot(vP,vQ) < 0)
         { //Shared SEQUENCE
-            inters.InsertBeforeHead(new cVertex(c.erg));
-            inters.InsertBeforeHead(new cVertex(c.snd));
+            inters->push_back(c.erg());
+            inters->push_back(c.snd());
             return;
-
         }
         // vP and vQ are parallel and separated. p and q are disjoint!
         if(cross == 0 && pInQ <0 && qInP < 0)
@@ -195,14 +202,16 @@ void voronoi::ConvexClip::ConvexIntersection(std::vector<Vertex*>& p, std::vecto
             //vP and vQ are collinear
         }else if(cross == 0 && pInQ == 0 && qInP == 0)
         {
-            if(flg == InsideFlag.PIN)
+            if(flg == PIN)
             {
                 ++aq;
-                currq = currq.next;
+                prevQ=currQ;
+                currQ=*(++iterQ);
             }else
             {
                 ++ap;
-                currp = currp.next;
+                prevP=currP;
+                currP=*(++iterP);
             }
             /* Generic cases
                  * cross  		halfplane condition   advance rule
@@ -216,31 +225,35 @@ void voronoi::ConvexClip::ConvexIntersection(std::vector<Vertex*>& p, std::vecto
         {
             if(qInP> 0)
             {
-                if(flg == InsideFlag.PIN)
-                    inters.InsertBeforeHead(new cVertex(currp.v));
+                if(flg == PIN)
+                    inters->push_back(currP);
                 ++ap;
-                currp = currp.next;
+                prevP=currP;
+                currP =*(++iterP);
             }else
             {
-                if(flg == InsideFlag.QIN)
-                    inters.InsertBeforeHead(new cVertex(currq.v));
+                if(flg == QIN)
+                    inters->push_back(currQ);
                 ++aq;
-                currq = currq.next;
+                prevQ=currQ;
+                currQ=*(++iterQ);
             }
         }else 
         {//cross < 0
             if(pInQ > 0)
             {
-                if(flg == InsideFlag.QIN)
-                    inters.InsertBeforeHead(new cVertex(currq.v));
+                if(flg == QIN)
+                    inters->push_back(currQ);
                 ++aq;
-                currq = currq.next;
+                prevQ=currQ;
+                currQ=*(++iterQ);
             }else
             {
-                if(flg == InsideFlag.PIN)
-                    inters.InsertBeforeHead(new cVertex(currp.v));
+                if(flg == PIN)
+                    inters->push_back(currP);
                 ++ap;
-                currp = currp.next;
+                prevP=currP;
+                currP=*(++iterP);
             }
         }
         /*

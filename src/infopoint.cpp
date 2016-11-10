@@ -4,12 +4,43 @@
 #include "point2d.h"
 using namespace voronoi;
 
-InfoPoint::InfoPoint(Point2D* erg, char code):
-    erg_(erg),snd_(NULL),code_(code)
+InfoPoint::InfoPoint(Point2D* erg, char code, bool needClearMem):
+    erg_(erg),snd_(NULL),code_(code),needClearMem_(needClearMem)
 {}
-InfoPoint::InfoPoint(Point2D* erg, Point2D* snd, char code):
-    erg_(erg),snd_(snd),code_(code)
+
+InfoPoint::InfoPoint(Point2D* erg, Point2D* snd, char code,bool needClearMem):
+    erg_(erg),snd_(snd),code_(code),needClearMem_(needClearMem)
 {}
+
+InfoPoint::~InfoPoint()
+{
+    if(needClearMem_)
+    {
+        if(erg_) delete erg_;
+        if(snd_) delete snd_;
+    }
+}
+
+bool InfoPoint::containNewlyCreatedPoint()
+{
+    return needClearMem_;
+}
+
+char InfoPoint::code()
+{
+    return code_;
+}
+
+Point2D InfoPoint::erg()
+{
+    return *erg_;
+}
+
+Point2D InfoPoint::snd()
+{
+    return *snd_;
+}
+
 const char* InfoPoint::toString()
 {
     //String ergs, snds = "";
